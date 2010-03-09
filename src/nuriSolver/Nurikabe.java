@@ -88,6 +88,9 @@ public class Nurikabe extends Thread implements Iterable<Coords>, Cloneable  {
 	/** Tells thread when to pause. */
 	public static volatile boolean threadSuspended = false;
 	
+	/** The last rule that was used for an inference. */
+	public static volatile String lastRule;
+	
 	/** Read the specified puzzle, solve it, and verify the solution. */
 	/** Usage: java ClassName [-d] filename (minus ".puz") */
 	public static void main(String[] args) {
@@ -144,6 +147,8 @@ public class Nurikabe extends Thread implements Iterable<Coords>, Cloneable  {
 	/** Grid of cells. Each is BLACK, WHITE, UNKNOWN, or a digit 1-9A-Z. */
 	private char[][] grid;
 
+	private short[][] guessLevel;
+	
 	/** Number of white cells expected in the solution. */
 	private int expWhiteCount;
 
@@ -151,7 +156,7 @@ public class Nurikabe extends Thread implements Iterable<Coords>, Cloneable  {
 	private int expBlackCount;
 	
 	/** Depth of recursive search. */
-	private int searchDepth;
+	private short searchDepth;
 	
 	/** Max depth of recursive search. */
 	static private int maxSearchDepth = 0;
@@ -201,7 +206,7 @@ public class Nurikabe extends Thread implements Iterable<Coords>, Cloneable  {
 	}
 
 	private void setState(char[][] grid, ArrayList<UCRegion> blackRegions,
-			ArrayList<UCRegion> whiteRegions, int searchDepth, int numUnknownCells) {
+			ArrayList<UCRegion> whiteRegions, short searchDepth, int numUnknownCells) {
 		this.blackRegions = blackRegions;
 		this.whiteRegions = whiteRegions;
 		this.grid = grid;
@@ -261,9 +266,14 @@ public class Nurikabe extends Thread implements Iterable<Coords>, Cloneable  {
 		return grid[cell.getRow()][cell.getColumn()];
 	}
 
-	/** Return the label at a particular location. */
+	/** Return the cell value at a particular location. */
 	public char get(int r, int c) {
 		return grid[r][c];
+	}
+
+	/** Return the label at a particular location. */
+	public short getGuessLevel(int r, int c) {
+		return guessLevel[r][c];
 	}
 
 	/** Return the number of rows in the puzzle. */
@@ -389,12 +399,32 @@ public class Nurikabe extends Thread implements Iterable<Coords>, Cloneable  {
 	protected void infer(Coords cell, char value, String rule) throws ContradictionException {
 		if (unifyWhite(get(cell)) == unifyWhite(value)) return; // Already was that value.
 		totalInferences++;
+		lastRule = rule;
 		debug("Rule " + rule + ": " + cell + " = " + value);
 		if (get(cell) == UNKNOWN)
 			numUnknownCells--;
 		set(cell, value);
+		setGuessLevel(cell, searchDepth);
 		debug("\n" + toString(cell));
 		checkControls();	// obey execution controls
+	}
+
+	private void setGuessLevel(Coords cell, short gl) {
+		guessLevel[cell.getRow()][cell.getColumn()] = gl;
+	}
+
+	private void setGuessLevel(int c, int r, short gl) {
+		guessLevel[c][r] = gl;
+	}
+	
+	/** Set guessLevel of all cells to at most the current guessLevel.
+	 * This is done when a trial/hypothesis completes successfully. 
+	 */
+	private void updateGuessLevel() {
+		for (int i = 0; i < getHeight(); i++)
+			for (int j = 0; j < getWidth(); j++)
+				if (getGuessLevel(i, j) > searchDepth)
+					setGuessLevel(i, j, searchDepth);		
 	}
 
 	/** Set the value at a given location.
@@ -687,6 +717,7 @@ public class Nurikabe extends Thread implements Iterable<Coords>, Cloneable  {
 				this.setState(trialPuzzle.grid, trialPuzzle.blackRegions,
 						trialPuzzle.whiteRegions, searchDepth, trialPuzzle.numUnknownCells);
 				latestBoard = this;
+				updateGuessLevel();
 				// adjust regions to point to this instead of trialPuzzle.
 				for (UCRegion region : blackRegions)
 					region.setState(this);
@@ -714,7 +745,7 @@ public class Nurikabe extends Thread implements Iterable<Coords>, Cloneable  {
 			return null;
 		}
 		newPuzzle.setState(copyGrid(), copyRegions(blackRegions, newPuzzle),
-			copyRegions(whiteRegions, newPuzzle), searchDepth + 1, numUnknownCells);
+			copyRegions(whiteRegions, newPuzzle), (short)(searchDepth + 1), numUnknownCells);
 		latestBoard = newPuzzle;
 		return (Object)newPuzzle;
 	}
@@ -1143,5 +1174,6 @@ public class Nurikabe extends Thread implements Iterable<Coords>, Cloneable  {
 	/** recreate grid in given size. Any old grid is discarded. */
 	void newGrid(int rows, int columns) {
 		grid = new char[rows][columns];
+		guessLevel = new short[rows][columns];
 	}
 }

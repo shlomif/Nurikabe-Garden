@@ -48,6 +48,9 @@ public class NurikabeVisualizer extends PApplet {
 		PFont fontClue = loadFont("CourierNew36.vlw");
 		textFont(fontClue, 36);
 		textAlign(CENTER);
+		
+		// use HSB color mode with low-res hue 
+		colorMode(HSB, 30, 100, 100);
 
 		// Start with given file and debug mode.
         puz = Nurikabe.init("../samples/lgo_1500.txt", 19, false, this);
@@ -70,7 +73,7 @@ public class NurikabeVisualizer extends PApplet {
     	pushMatrix();
     	translate(margin, margin);
 
-    	stroke(128);
+    	stroke(0, 0, 50); // medium gray
     	
         for (i = 0; i <= puz.getHeight(); i++)
         	line(left, i * cellH, right, i * cellH);
@@ -81,15 +84,16 @@ public class NurikabeVisualizer extends PApplet {
         for (i = 0; i < puz.getHeight(); i++) {
         	for (j = 0; j < puz.getWidth(); j++) {
         		char c = puz.get(i, j);
+        		short gl = puz.getGuessLevel(i, j);
         		int x = j * cellW + 1, y = i * cellH + 1;
         		if (c == Nurikabe.BLACK) {
-    				fill(0);
+        			setFill(gl, Nurikabe.BLACK);
     				rect(x, y, cellW - 1, cellH - 1);
         		} else if (Nurikabe.isWhite(c)) {
-					fill(255);
+        			setFill(gl, Nurikabe.WHITE);
 					rect(x, y, cellW - 1, cellH - 1);
 					if (Nurikabe.isANumber(c)) {
-						fill(0);
+						fill(0, 0, 0);
 						text(c, x + (int)(cellW * 0.5), y + (int)(cellH * 0.75));
 					}
         		}
@@ -99,6 +103,19 @@ public class NurikabeVisualizer extends PApplet {
     	popMatrix();
     }
 
+    /** Set fill color for square based on guessLevel
+     * (known vs. hypothesis --> hue) and putative value.
+     * @param guessLevel
+     * @param value
+     */
+    private void setFill(short guessLevel, char value) {
+    	if (guessLevel == 0)
+    		fill(0, 0, (value == Nurikabe.BLACK) ? 0 : 100);
+    	else
+    		fill(guessLevel, 40,
+    				(value == Nurikabe.BLACK) ? 40 : 100);
+    }
+    
 	public void draw() {
 		// System.out.println("In draw() at " + System.currentTimeMillis()); // debugging
 		drawGrid(puz);
@@ -126,14 +143,13 @@ public class NurikabeVisualizer extends PApplet {
 			break;
 		case ' ':
 		case 'p':
-			Nurikabe.threadSuspended = !Nurikabe.threadSuspended;
 			Nurikabe.stopMode = Nurikabe.StopMode.CONTINUE;
-			go();
+			Nurikabe.threadSuspended = !Nurikabe.threadSuspended;
 			break;
 		case 'c':
 		case 'C':
-			Nurikabe.threadSuspended = false;
 			Nurikabe.stopMode = Nurikabe.StopMode.CONTINUE;
+			Nurikabe.threadSuspended = false;
 			break;		
 		}
 
