@@ -105,6 +105,10 @@ public class NurikabeVisualizer extends PApplet {
 	}
 	
 	public void mouseClicked() {
+		go();
+	}
+	
+	public void go() {
 		if (!startedSolving) {
 			drawGrid(puz);
 			startedSolving = true;
@@ -118,21 +122,27 @@ public class NurikabeVisualizer extends PApplet {
 		switch(key) {
 		case '1':
 			Nurikabe.stopMode = Nurikabe.StopMode.ONESTEP;
-			if (!Nurikabe.threadSuspended) Nurikabe.threadSuspended = true;
+			Nurikabe.threadSuspended = false;
 			break;
 		case ' ':
 		case 'p':
 			Nurikabe.threadSuspended = !Nurikabe.threadSuspended;
-			if (!Nurikabe.threadSuspended) {
-				synchronized(this) {
-		            this.notifyAll();					
-				}
-			}
+			Nurikabe.stopMode = Nurikabe.StopMode.CONTINUE;
+			go();
 			break;
 		case 'c':
 		case 'C':
-			break;
-			
+			Nurikabe.threadSuspended = false;
+			Nurikabe.stopMode = Nurikabe.StopMode.CONTINUE;
+			break;		
+		}
+
+		go(); // start if not yet started
+
+		if (!Nurikabe.threadSuspended) {
+			synchronized(this) {
+	            this.notifyAll();					
+			}
 		}
 	}
 }

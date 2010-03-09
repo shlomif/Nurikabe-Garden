@@ -394,6 +394,7 @@ public class Nurikabe extends Thread implements Iterable<Coords>, Cloneable  {
 			numUnknownCells--;
 		set(cell, value);
 		debug("\n" + toString(cell));
+		checkControls();	// obey execution controls
 	}
 
 	/** Set the value at a given location.
@@ -474,14 +475,9 @@ public class Nurikabe extends Thread implements Iterable<Coords>, Cloneable  {
 			 * don't help.
 			 */
 			while (!isSolved() && changed) {
-				// obey execution controls
-				checkControls();
-				
 				// check for any constraint violations to catch them early and prune.
 				checkConstraints();
 				
-				checkControls();
-
 				changed = false;
 				try {
 					applyProductionRules();
@@ -493,7 +489,6 @@ public class Nurikabe extends Thread implements Iterable<Coords>, Cloneable  {
 
 		// Last resort: try searching.
 		if (!isSolved()) {
-			checkControls();
 			// Find an unknown cell.
 			Object cellAndColor[] = pickUnknownCell();
 			Coords unknownCell = (Coords)(cellAndColor[0]);
@@ -514,6 +509,8 @@ public class Nurikabe extends Thread implements Iterable<Coords>, Cloneable  {
 	 * See http://java.sun.com/javase/7/docs/technotes/guides/concurrency/threadPrimitiveDeprecation.html
 	 */
 	private void checkControls() {
+		if (stopMode == StopMode.ONESTEP)
+			threadSuspended = true;
         try {
         	if (threadSuspended) {
         		System.out.println("Suspending thread...");
