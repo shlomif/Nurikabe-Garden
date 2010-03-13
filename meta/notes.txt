@@ -1,0 +1,69 @@
+visualizer creates / calls solver
+
+solver also has a main, for invoking w/o vis
+
+solver creates / calls parser
+
+parser runs & returns a NuriState.
+
+solver uses NuriState(s).
+
+
+Given that we might be running in batch mode...
+without vis...
+I guess solver still owns parser,
+but reinits its own state for each new puzzle,
+reusing the same parser,
+creating new boards?
+
+
+solve():
+should the solver just recurse on solve, or does it
+need to create a new instance of the solver?
+
+Look through the instance fields of the solver and see
+what they belong to:
+A - Can they be static, applying to all solvers (in case theoretically
+there were more than one solver working)?  
+B - Can they be shared by all "solvers" (whether represented by
+separate instances or by recursive calls to solve) within
+a single solving effort?
+C - Or must they be separate for each recursive solve?
+  To determine this, suppose a variable changes during
+  a recursive solve; must its value be restored on
+  returning from the recursion?
+  (If so could they be offloaded into the board state, which
+  is ? one-to-one with each solve recursion?)
+
+See //A, //B, //C comments in NuriSolver.java
+
+If any fall into the last category, they must be copied
+when we do a recursive solve, so that means a new
+instance of the solver... unless we offload them into the board state.
+
+If it creates a new instance of the solver, it creates a
+new thread (because solver extends Thread).
+Which can be convenient if we can use new threads at that point...
+But it would be better to be able to decouple the creation
+of new threads from the need for new solver instances.
+E.g. if we have only one or two processors and already six
+solver threads, there's no point in creating more threads. It only
+uses up resources.
+
+TODO: Remember, static members of solver class that need to be accessed
+by all solver threads, must be volatile... and possibly synchronized!
+
+If we're going to have multiple solver threads.
+Which we don't yet.
+
+Probably the wise thing is to get this working without
+separate solver threads; then add that later.
+
+Which will probably including separating the thread-derived
+class from the solver class. The constructor for the thread-derived
+class can accept a solver parameter that sets a member field for
+the associated solver; the run() method will call methods
+on that solver.
+
+java.lang.Runtime.getRuntime().availableProcessors()
+--> int
