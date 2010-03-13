@@ -1,16 +1,16 @@
 package nuriSolver;
 import java.util.Iterator;
 
-/** Iterates through the cells of a Nurikabe puzzle. */
+/** Iterates through the cells of a NuriState puzzle. */
 public class NurikabeIterator implements Iterator<Coords> {
 
-	private Nurikabe puzzle;
+	private NuriState puzzle;
 	
 	int row;
 	
 	int column;
 	
-	public NurikabeIterator(Nurikabe puzzle) {
+	public NurikabeIterator(NuriState puzzle) {
 		super();
 		this.puzzle = puzzle;
 		row = 0;

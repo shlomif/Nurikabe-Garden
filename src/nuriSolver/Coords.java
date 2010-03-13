@@ -44,4 +44,10 @@ public class Coords {
 		Coords thatCoords = (Coords) that;
 		return (row == thatCoords.row) && (column == thatCoords.column);
 	}
+
+	/** set coords of this to given cell */ 
+	public void copy(Coords cell) {
+		row = cell.row;
+		column = cell.column;
+	}
 }

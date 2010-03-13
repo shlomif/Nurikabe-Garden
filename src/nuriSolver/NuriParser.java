@@ -17,18 +17,24 @@ import java.util.regex.Pattern;
 public class NuriParser {
 	private String filename = null;
 	
-	public NuriParser(String fn) {
+	private NuriSolver solver = null;
+	
+	public NuriParser(String fn, NuriSolver s) {
 		filename = fn;
+		solver = s;
 	}
 
-	void loadFile(Nurikabe puz, int i) {
+	NuriState loadFile(int i) {
+		NuriState puz = new NuriState(solver);
 		if (filename.endsWith(".puz"))
 			loadPuz(puz, filename);
 		else
 			loadTxt(puz, filename, i);	
+
+		return puz;
 	}
 
-	void loadPuz(Nurikabe puz, String filename) {
+	void loadPuz(NuriState puz, String filename) {
 		try {
 			Scanner in = new Scanner(new FileInputStream(filename));
 			ArrayList<String> lines = new ArrayList<String>();
@@ -43,7 +49,8 @@ public class NuriParser {
 				for (int c = 0; c < columns; c++) {
 					char symbol = lines.get(r).charAt(c);
 					// grid[r][c] = (symbol == WHITE) ? UNKNOWN : symbol;
-					puz.initialize(r, c, symbol);
+					puz.initialize(r, c,
+							(symbol == NuriState.WHITE || symbol == '-') ? NuriState.UNKNOWN : symbol);
 				}
 			}
 			puz.prepareStats();
@@ -60,7 +67,7 @@ public class NuriParser {
 		 */
 		
 		/** Load i-th puzzle from filename (1-based indexing). */ 
-		void loadTxt(Nurikabe puz, String filename, int i) {
+		void loadTxt(NuriState puz, String filename, int i) {
 			try {
 				Scanner in = new Scanner(new FileInputStream(filename));
 				// ArrayList<String> lines = new ArrayList<String>();
@@ -119,13 +126,13 @@ public class NuriParser {
 				String id = mr.group(1);
 				short columns = Short.parseShort(mr.group(2));
 				short rows = Short.parseShort(mr.group(3));
-				puz.debug("ID: " + id + "; columns: " + columns + "; rows: " + rows);
+				solver.debugMsg("ID: " + id + "; columns: " + columns + "; rows: " + rows);
 	
 				String puzzle = mr.group(4);
 				String solution = (mr.groupCount() >= 6) ? mr.group(6) : null;
 				String comment = (mr.groupCount() >= 8) ? mr.group(8) : null;
 				
-				puz.debug("Puzzle: " + puzzle+ "\nSolution: " + solution + "\nComment: " + comment);
+				solver.debugMsg("Puzzle: " + puzzle+ "\nSolution: " + solution + "\nComment: " + comment);
 	
 				puz.newGrid(rows, columns);
 				
@@ -133,9 +140,9 @@ public class NuriParser {
 					for (int c = 0; c < columns; c++) {
 						char ch = puzzle.charAt(r * columns + c);
 						if (ch == '-' || ch == '?') {
-							puz.initialize(r, c, Nurikabe.UNKNOWN);
-						} else if (ch == Nurikabe.WHITE || ch == Nurikabe.BLACK ||
-								Nurikabe.isANumber(ch)) {
+							puz.initialize(r, c, NuriState.UNKNOWN);
+						} else if (ch == NuriState.WHITE || ch == NuriState.BLACK ||
+								NuriState.isANumber(ch)) {
 							puz.initialize(r, c, ch);
 						} else {
 							throw new IOException("Unrecognized character " + ch + " in puzzle " + id);

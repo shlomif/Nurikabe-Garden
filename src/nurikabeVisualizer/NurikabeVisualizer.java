@@ -1,15 +1,20 @@
 /*
+ * TODO: I'm going to need text labels, buttons and stuff to give more info about
+ * what's happening, and more user control. UI is outside the scope of Processing.
+ * Surround the Processing applet component with a regular Java GUI frame
+ * or whatever. Probably not Swing -- I hear it's bloated. 
  * DONE: cache result of isSolved; pass it back and forth via setState; clear it when sthg changes
  * DONE: parse new file format (lgo_1500.txt)
- * TODO: visualize solving progress (colors of islands, etc.)
- * TODO: implement stop-motion mode; solver thread pauses after every
+ * DONE: visualize solving progress (colors of islands, etc.)
+ * DONE: implement stop-motion mode; solver thread pauses after every
  * inference or at each new hypotheses, waiting for user input to continue.
  * Key controls:
- * 1 ("step into") - do one step and pause until further input.
+ * DONE: 1 ("one step") - do one step and pause until further input.
  *   When starting a new hypothesis, do not run it (recursively) to conclusion.
- * v ("step over") -  do one step and pause until further input.
+ * TODO: i ("step into") - run until starting a new hypothesis.
+ * TODO: v ("step over") -  do one step and pause until further input.
  *   When starting a new hypothesis, DO run it (recursively) to conclusion.
- * u ("step out")  -  continue until current hypothesis trial returns.
+ * TODO: u ("step out")  -  continue until current hypothesis trial returns.
  *   If no hypothesis trial is running, equivalent to 'c'.
  * p or SPACE ("pause") - pause until further input.
  *   If already paused, Continue.
@@ -17,18 +22,22 @@
  * c ("continue") - run and do not stop until finished or interrupted.
  * ESC - stop solving; if already stopped, dispose of solver.
  *   (maybe ask for confirmation?)
+ * TODO: r ("restart") - go back to all unknowns except the numbers.
  * A "step" is typically the application (fruitful or not) of one rule,
  * or the creation of a new trial (hypothesis) or the return from a hypothesis trial.
  * TODO: profiling (accumulate performance stats about rules fired)
  * TODO: add some rules?
  * TODO: batch mode
+ * DONE: when user resizes window, resize grid squares accordingly. (but not font?) 
  */
 
 package nurikabeVisualizer;
 
-import nuriSolver.*;
 import processing.core.PApplet;
 import processing.core.PFont;
+
+import nuriSolver.*;
+import nuriSolver.NuriSolver.StopMode;
 
 public class NurikabeVisualizer extends PApplet {
 
@@ -37,13 +46,23 @@ public class NurikabeVisualizer extends PApplet {
 	 */
 	private static final long serialVersionUID = -1306716595311291496L;
 
-	int cellW = 40, cellH = 40, margin = 10;
+	int margin = 10;
 
-	Nurikabe puz = null;
+	NuriState puz = null;
+	NuriSolver solver = null;
 	
 	boolean startedSolving = false;
 	
 	public void setup() {
+		size(400, 400);
+		// Start with given file and debug mode.
+		
+		System.out.println(Runtime.getRuntime().availableProcessors());
+		
+		// solver = new NuriSolver("../samples/lgo_1500.txt", 19, false, this);
+		// solver = new NuriSolver("../samples/tiny3.puz", 1, false, this);
+		solver = new NuriSolver("../samples/janko_ts.txt", 182, false, this);
+
 		frameRate(15);
 		PFont fontClue = loadFont("CourierNew36.vlw");
 		textFont(fontClue, 36);
@@ -52,28 +71,31 @@ public class NurikabeVisualizer extends PApplet {
 		// use HSB color mode with low-res hue 
 		colorMode(HSB, 30, 100, 100);
 
-		// Start with given file and debug mode.
-        puz = Nurikabe.init("../samples/lgo_1500.txt", 19, false, this);
-        // puz = Nurikabe.init("../samples/lgo_puzzles.txt", false);
-		size(puz.getWidth() * cellW + margin * 2,
-				puz.getHeight() * cellH + margin * 2);
 		startedSolving = false;
 	}
         
-    public void drawGrid(Nurikabe puz) {
+    public void drawGrid(NuriState puz) {
 		// System.out.println("In drawGrid() at " + System.currentTimeMillis()); // debugging
     	//TODO: need to add synchronization or sthg to make sure the board object doesn't disappear on us
     	// while we're accessing it.
-    	puz = Nurikabe.latestBoard;
+    	puz = solver.latestBoard;
     	int left = 0, top = 0, margin = 10;
+    	int cellW = (width - margin * 2) / puz.getWidth();
+    	int cellH = (height - margin * 2) / puz.getHeight();
+    	// Make cells square.
+    	cellW = Math.min(cellW, cellH);
+    	cellH = cellW;
     	int right = puz.getWidth() * cellW,
     		bottom = puz.getHeight() * cellH;
     	int i, j;
 
+    	background(0, 0, 75); // light gray
+    	
     	pushMatrix();
     	translate(margin, margin);
 
     	stroke(0, 0, 50); // medium gray
+        strokeWeight(1);
     	
         for (i = 0; i <= puz.getHeight(); i++)
         	line(left, i * cellH, right, i * cellH);
@@ -86,18 +108,27 @@ public class NurikabeVisualizer extends PApplet {
         		char c = puz.get(i, j);
         		short gl = puz.getGuessLevel(i, j);
         		int x = j * cellW + 1, y = i * cellH + 1;
-        		if (c == Nurikabe.BLACK) {
-        			setFill(gl, Nurikabe.BLACK);
+        		if (c == NuriState.BLACK) {
+        			setFill(gl, NuriState.BLACK);
     				rect(x, y, cellW - 1, cellH - 1);
-        		} else if (Nurikabe.isWhite(c)) {
-        			setFill(gl, Nurikabe.WHITE);
+        		} else if (NuriState.isWhite(c)) {
+        			setFill(gl, NuriState.WHITE);
 					rect(x, y, cellW - 1, cellH - 1);
-					if (Nurikabe.isANumber(c)) {
+					if (NuriState.isANumber(c)) {
 						fill(0, 0, 0);
-						text(c, x + (int)(cellW * 0.5), y + (int)(cellH * 0.75));
+						text(c, x + (int)(cellW * 0.5), y + (int)(cellH * 0.5) + 10);
 					}
         		}
         	}
+        }
+        
+        if (solver.lastChangedCell != null) {
+	        stroke((float) 5.1, 85, 100); // yellow
+	        noFill();
+	        strokeWeight((float) (cellW * 0.1));
+	        i = solver.lastChangedCell.getRow();
+	        j = solver.lastChangedCell.getColumn();
+	        rect(cellW * j, cellH * i, cellW, cellH);
         }
         
     	popMatrix();
@@ -110,10 +141,10 @@ public class NurikabeVisualizer extends PApplet {
      */
     private void setFill(short guessLevel, char value) {
     	if (guessLevel == 0)
-    		fill(0, 0, (value == Nurikabe.BLACK) ? 0 : 100);
+    		fill(0, 0, (value == NuriState.BLACK) ? 0 : 100);
     	else
     		fill(guessLevel, 40,
-    				(value == Nurikabe.BLACK) ? 40 : 100);
+    				(value == NuriState.BLACK) ? 40 : 100);
     }
     
 	public void draw() {
@@ -129,7 +160,7 @@ public class NurikabeVisualizer extends PApplet {
 		if (!startedSolving) {
 			drawGrid(puz);
 			startedSolving = true;
-			puz.start();
+			solver.start();
 		}
 	}
 	
@@ -138,24 +169,28 @@ public class NurikabeVisualizer extends PApplet {
 
 		switch(key) {
 		case '1':
-			Nurikabe.stopMode = Nurikabe.StopMode.ONESTEP;
-			Nurikabe.threadSuspended = false;
+			solver.stopMode = StopMode.ONESTEP;
+			solver.threadSuspended = false;
 			break;
 		case ' ':
 		case 'p':
-			Nurikabe.stopMode = Nurikabe.StopMode.CONTINUE;
-			Nurikabe.threadSuspended = !Nurikabe.threadSuspended;
+			solver.stopMode = StopMode.CONTINUE;
+			solver.threadSuspended = !solver.threadSuspended;
 			break;
 		case 'c':
 		case 'C':
-			Nurikabe.stopMode = Nurikabe.StopMode.CONTINUE;
-			Nurikabe.threadSuspended = false;
-			break;		
+			solver.stopMode = StopMode.CONTINUE;
+			solver.threadSuspended = false;
+			break;
+		case 'r':
+			solver.stopMode = StopMode.RESTART;
+			solver.threadSuspended = false;
+			break;
 		}
 
 		go(); // start if not yet started
 
-		if (!Nurikabe.threadSuspended) {
+		if (!solver.threadSuspended) {
 			synchronized(this) {
 	            this.notifyAll();					
 			}
