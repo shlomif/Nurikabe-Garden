@@ -45,8 +45,8 @@ public class NuriFrame extends JFrame implements ActionListener {
 	private NuriSolver solver = null;
 	private NuriState board = null;
 	private NuriVisualizer vis = null;
-	// AWT: private Label statusLabel = null;
-	private JLabel statusLabel = null;
+
+	private JLabel statusLabel, depthLabel;
 	
 	private void init() {
 		// helpful: see http://zetcode.com/tutorials/javaswingtutorial/swinglayoutmanagement/
@@ -84,8 +84,20 @@ public class NuriFrame extends JFrame implements ActionListener {
         // JLabel titleLabel = new JLabel("<html><h1>Nurikabe Garden</h1></html>");
         // panel.add(titleLabel, BorderLayout.NORTH);
 
+		/** Status labels at bottom */
+		Box labelContainer = new Box(BoxLayout.X_AXIS);
+		panel.add(labelContainer, BorderLayout.SOUTH);
+
         statusLabel = new JLabel();
-        panel.add(statusLabel, BorderLayout.SOUTH);
+        labelContainer.add(statusLabel);
+
+		// space between labels
+		labelContainer.add(Box.createHorizontalStrut(20));
+
+		// TODO: would be nice to fix this labels x position so it didn't jump
+		// around as the status label changes length.	
+        depthLabel = new JLabel();
+        labelContainer.add(depthLabel);
         
         // For embedding Processing applet see
         // http://dev.processing.org/reference/core/javadoc/processing/core/PApplet.html
@@ -101,9 +113,10 @@ public class NuriFrame extends JFrame implements ActionListener {
 
         // TODO: parameterize; or get from a File Open dlg
 		parser = new NuriParser("samples/janko_ts.txt");
-		board = parser.loadFile(182);
+		board = parser.loadFile(25);
 		
-		solver = new NuriSolver(board, true, vis);
+		// initial state, debug mode, visualizer
+		solver = new NuriSolver(board, false, vis);
 		// board.setSolver(solver);
 		vis.setSolver(solver);
 
@@ -133,6 +146,7 @@ public class NuriFrame extends JFrame implements ActionListener {
 			// TODO: optimize: don't set if not changed.
 			statusLabel.setText("Inferred a cell using rule " + solver.lastRule);
 		}
+		depthLabel.setText("Search depth: " + solver.searchDepth());
 	}
 	
    public void actionPerformed(ActionEvent e) {

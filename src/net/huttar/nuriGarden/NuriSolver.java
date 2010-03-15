@@ -62,7 +62,7 @@ class NuriSolver extends Thread  {
 	static private int maxSearchDepth = 0; //B
 
 	/** Depth of recursive search. */
-	private short searchDepth() {
+	short searchDepth() {
 		if (latestBoard != null)
 			return latestBoard.searchDepth;
 		else

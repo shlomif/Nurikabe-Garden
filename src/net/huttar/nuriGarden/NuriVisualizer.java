@@ -48,10 +48,14 @@ class NuriVisualizer extends PApplet {
 	 * 
 	 */
 	private static final long serialVersionUID = -1306716595311291496L;
+	
+	private PFont currFont = null, bigFont = null, smallFont = null; 
+	private final int smallFontSize = 24, bigFontSize = 40;
+	private int currFontSize = 0;
 
 	private final int margin = 10;
-	private final int prefCellSize = 32;
-	
+	private final int prefCellSize = (smallFontSize * 3) / 2;
+
 	NuriFrame frame = null;
 	NuriState puz = null;
 	NuriSolver solver = null;
@@ -69,10 +73,14 @@ class NuriVisualizer extends PApplet {
 		// solver = new NuriSolver("../samples/tiny3.puz", 1, false, this);
 		// solver = new NuriSolver("samples/janko_ts.txt", 182, false, this);
 
-		frameRate(15);
-		PFont fontClue = loadFont("CourierNew36.vlw");
-		textFont(fontClue, 36);
+		frameRate(10);
+		bigFont = loadFont("Gentium-40.vlw");
+		smallFont = loadFont("Gentium-24.vlw");
+		currFont = bigFont;
+		textFont(bigFont);
 		textAlign(CENTER);
+		currFontSize = currFont.size; // docs don't say if this is pixels or points
+		System.out.println("Curr font size: " + currFontSize);
 		
 		// use HSB color mode with low-res hue 
 		colorMode(HSB, 30, 100, 100);
@@ -87,9 +95,22 @@ class NuriVisualizer extends PApplet {
 		size(prefW, prefH);
 	}
 	
+	void decideFont(int cellSize) {
+		if (cellSize < (bigFontSize * 1.2) && currFont != smallFont) {
+			currFont = smallFont;
+			textFont(smallFont);
+			currFontSize = smallFontSize;
+		} else if (cellSize >= (bigFontSize * 1.2) && currFont != bigFont){
+			currFont = bigFont;
+			textFont(bigFont);
+			currFontSize = bigFontSize;
+		}
+	}
+	
+	//TODO: draw numbers in decimal (2-digit) when > 9
     void drawGrid(NuriState puz) {
 		// System.out.println("In drawGrid() at " + System.currentTimeMillis()); // debugging
-    	//TODO: need to add synchronization or sthg to make sure the board object doesn't disappear on us
+    	//TODO: probably need to add synchronization or sthg to make sure the board object doesn't disappear on us
     	// while we're accessing it.
     	puz = solver.latestBoard;
     	int left = 0, top = 0, margin = 10;
@@ -98,6 +119,9 @@ class NuriVisualizer extends PApplet {
     	// Make cells square.
     	cellW = Math.min(cellW, cellH);
     	cellH = cellW;
+    	decideFont(cellW);
+    	int cw2 = cellW / 2;
+    	int numberHeight = cw2 + currFontSize * 7 / 24; // This approximation seems to work well.
     	int right = puz.getWidth() * cellW,
     		bottom = puz.getHeight() * cellH;
     	int i, j;
@@ -107,13 +131,17 @@ class NuriVisualizer extends PApplet {
     	pushMatrix();
     	translate(margin, margin);
 
-    	stroke(0, 0, 50); // medium gray
+    	stroke(0, 0, 40); // medium gray
         strokeWeight(1);
-    	
-        for (i = 0; i <= puz.getHeight(); i++)
-        	line(left, i * cellH, right, i * cellH);
-        for (j = 0; j <= puz.getWidth(); j++)
-        	line(j * cellW, top, j * cellW, bottom);
+
+        drawLines(cellW, cellH, top, left, right, bottom);
+
+        // draw shadow lines for beveled look?
+        pushMatrix();
+        stroke(0, 0, 80); // light gray
+    	translate(1, 1);
+        drawLines(cellW, cellH, top, left, right, bottom);
+        popMatrix();
         
         noStroke();
         for (i = 0; i < puz.getHeight(); i++) {
@@ -128,8 +156,8 @@ class NuriVisualizer extends PApplet {
         			setFill(gl, NuriState.WHITE);
 					rect(x, y, cellW - 1, cellH - 1);
 					if (NuriState.isANumber(c)) {
-						fill(0, 0, 0);
-						text(c, x + (int)(cellW * 0.5), y + (int)(cellH * 0.5) + 10);
+						drawNumber(c, x + cw2, y + numberHeight);
+						// text(c, x + cw2, y + numberHeight);
 					}
         		}
         	}
@@ -147,7 +175,28 @@ class NuriVisualizer extends PApplet {
     	popMatrix();
     }
 
-    /** Set fill color for square based on guessLevel
+    private void drawLines(int cellW, int cellH, int top, int left, int right,
+			int bottom) {
+        for (int i = 0; i <= puz.getHeight(); i++)
+        	line(left, i * cellH, right, i * cellH);
+        for (int j = 0; j <= puz.getWidth(); j++)
+        	line(j * cellW, top, j * cellW, bottom);
+	}
+
+	/** Draw digits on grid. 
+     * c is character representation of digit.
+     * Nudge left if 2-digit number. */
+    private void drawNumber(char c, int x, int y) {
+    	int d = NuriState.numberValue(c);
+    	assert(d < 100); // The parser can't give us numbers > 99.
+		fill(0, 0, 0);  // black
+    	if (d < 10)
+    		text(c, x, y);
+    	else
+    		text(Integer.toString(d), x - currFontSize / 20, y);
+	}
+
+	/** Set fill color for square based on guessLevel
      * (known vs. hypothesis --> hue) and putative value.
      * @param guessLevel
      * @param value
