@@ -25,19 +25,23 @@ public class NuriFrame extends Frame {
 	private NuriSolver solver = null;
 	private NuriState board = null;
 	private NurikabeVisualizer vis = null;
+	private Label statusLabel = null;
 	
 	private void init() {
         setLayout(new BorderLayout());
-        // for embedding Processing see http://dev.processing.org/reference/core/javadoc/processing/core/PApplet.html
-        vis = new NurikabeVisualizer();
-        add(vis, BorderLayout.CENTER);
-        
+
         Label titleLabel = new Label("Nurikabe Garden");
         add(titleLabel, BorderLayout.NORTH);
 
-        Label statusLabel = new Label("status");
+        statusLabel = new Label("Status...");
         add(statusLabel, BorderLayout.SOUTH);
 
+        // For embedding Processing applet see
+        // http://dev.processing.org/reference/core/javadoc/processing/core/PApplet.html
+        vis = new NurikabeVisualizer();
+        vis.frame = this;
+        add(vis, BorderLayout.CENTER);
+        
         // TODO: get frame to properly surround PApplet.
         setSize(600, 500);
         setResizable(true);
@@ -59,11 +63,22 @@ public class NuriFrame extends Frame {
         vis.init();
 	}
 
+	/** Update status display.
+	 * Called from event loop in visualizer.
+	 * I don't think we need to synchronize this, unless it gets critical.
+	 * Keep an eye on it though.
+	 */
+	void updateStatus() {
+		if (solver.lastRule != null) {
+			// if (statusLabel.getText() != solver.lastRule)
+			// TODO: optimize: don't set if not changed.
+			statusLabel.setText("Inferred a cell using rule " + solver.lastRule);
+		}
+	}
+	
 	public static void main(String[] args) {
 		NuriFrame nf = new NuriFrame();
 		nf.init();
-		
-
 	}
     
 }

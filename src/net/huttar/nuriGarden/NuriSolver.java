@@ -273,7 +273,7 @@ class NuriSolver extends Thread  {
 			 * of solver? That's how we were doing it before...
 			 * Which means creating a separate thread? */
 			boolean result = solve(trialBoard);
-			debugMsg(hypoth + " success: " + result);
+			debugMsg(searchDepth(), hypoth + " success: " + result);
 			if (result) {
 				board.setState(trialBoard.grid, trialBoard.blackRegions,
 						trialBoard.whiteRegions, board.searchDepth, trialBoard.numUnknownCells);

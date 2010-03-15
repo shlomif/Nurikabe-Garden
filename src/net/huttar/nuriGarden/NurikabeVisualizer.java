@@ -49,6 +49,7 @@ class NurikabeVisualizer extends PApplet {
 
 	int margin = 10;
 
+	NuriFrame frame = null;
 	NuriState puz = null;
 	NuriSolver solver = null;
 	
@@ -151,6 +152,7 @@ class NurikabeVisualizer extends PApplet {
 	public void draw() {
 		// System.out.println("In draw() at " + System.currentTimeMillis()); // debugging
 		drawGrid(puz);
+		frame.updateStatus();
 	}
 	
 	public void mouseClicked() {
