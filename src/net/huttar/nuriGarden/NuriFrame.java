@@ -2,6 +2,7 @@ package net.huttar.nuriGarden;
 
 import java.awt.Frame;
 import java.awt.BorderLayout;
+import java.awt.Label;
 
 
 /** 
@@ -30,6 +31,9 @@ public class NuriFrame extends Frame {
         // for embedding Processing see http://dev.processing.org/reference/core/javadoc/processing/core/PApplet.html
         vis = new NurikabeVisualizer();
         add(vis, BorderLayout.CENTER);
+        
+        Label label = new Label("Nurikabe Garden");
+        add(label, BorderLayout.NORTH);
 
         // TODO: get frame to properly surround PApplet.
         setSize(600, 400);
