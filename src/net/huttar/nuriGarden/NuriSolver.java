@@ -111,6 +111,12 @@ class NuriSolver extends Thread  {
 		solver.solveWrapper();
 	}
 
+	/** Start solver thread only if not already started. */
+	public void maybeStart() {
+		if (getState() == Thread.State.NEW)
+			start();		
+	}
+
 	// How to run as a thread.
 	// Later if we use threads within a solver, we'll want run() to call solve().
 	public void run() {
@@ -629,6 +635,5 @@ class NuriSolver extends Thread  {
         } catch (InterruptedException e){
         }
 	}
-
 
 }

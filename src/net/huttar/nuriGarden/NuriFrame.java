@@ -63,6 +63,7 @@ public class NuriFrame extends JFrame implements ActionListener {
 		
 		JButton solveButton = new JButton("Solve");
 		solveButton.setMnemonic(KeyEvent.VK_S);
+		solveButton.setToolTipText("Attempt to solve the puzzle uniquely");
 		solveButton.setActionCommand("solve");
 		solveButton.addActionListener(this);
 		buttonPanel.add(solveButton);
@@ -70,8 +71,19 @@ public class NuriFrame extends JFrame implements ActionListener {
 		// space between buttons
 		buttonPanel.add(Box.createVerticalStrut(6));
 
-		JButton quitButton = new JButton("Quit");
-		quitButton.setMnemonic(KeyEvent.VK_Q);
+		JButton resetButton = new JButton("Reset");
+		resetButton.setMnemonic(KeyEvent.VK_R);
+		resetButton.setToolTipText("Clear the puzzle back to numbers only");
+		resetButton.setActionCommand("reset");
+		resetButton.addActionListener(this);
+		buttonPanel.add(resetButton);
+		
+		// space between buttons
+		buttonPanel.add(Box.createVerticalStrut(6));
+
+		JButton quitButton = new JButton("Exit");
+		quitButton.setMnemonic(KeyEvent.VK_X);
+		quitButton.setToolTipText("Exit Nurikabe Garden");
 		quitButton.setActionCommand("quit"); // System.exit(1);
 		quitButton.addActionListener(this);
 		buttonPanel.add(quitButton);
@@ -88,16 +100,14 @@ public class NuriFrame extends JFrame implements ActionListener {
 		Box labelContainer = new Box(BoxLayout.X_AXIS);
 		panel.add(labelContainer, BorderLayout.SOUTH);
 
-        statusLabel = new JLabel();
-        labelContainer.add(statusLabel);
-
+        depthLabel = new JLabel();
+        labelContainer.add(depthLabel);
+        
 		// space between labels
 		labelContainer.add(Box.createHorizontalStrut(20));
 
-		// TODO: would be nice to fix this labels x position so it didn't jump
-		// around as the status label changes length.	
-        depthLabel = new JLabel();
-        labelContainer.add(depthLabel);
+        statusLabel = new JLabel();
+        labelContainer.add(statusLabel);
         
         // For embedding Processing applet see
         // http://dev.processing.org/reference/core/javadoc/processing/core/PApplet.html
@@ -113,7 +123,7 @@ public class NuriFrame extends JFrame implements ActionListener {
 
         // TODO: parameterize; or get from a File Open dlg
 		parser = new NuriParser("samples/janko_ts.txt");
-		board = parser.loadFile(25);
+		board = parser.loadFile(182); // Janko 25: two-digit
 		
 		// initial state, debug mode, visualizer
 		solver = new NuriSolver(board, false, vis);
@@ -151,8 +161,11 @@ public class NuriFrame extends JFrame implements ActionListener {
 	
    public void actionPerformed(ActionEvent e) {
         if ("solve".equals(e.getActionCommand())) {
+        	solver.maybeStart();
         } else if ("quit".equals(e.getActionCommand())) {
         	System.exit(1);
+        } else {
+        	// assert(false); // unrecognized action event
         }
     }
 

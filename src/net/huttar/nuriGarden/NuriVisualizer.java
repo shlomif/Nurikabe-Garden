@@ -54,13 +54,11 @@ class NuriVisualizer extends PApplet {
 	private int currFontSize = 0;
 
 	private final int margin = 10;
-	private final int prefCellSize = (smallFontSize * 3) / 2;
+	private final int prefCellSize = smallFontSize;
 
 	NuriFrame frame = null;
 	NuriState puz = null;
 	NuriSolver solver = null;
-	
-	boolean startedSolving = false;
 	
 	public void setup() {
 		size(400, 400); // default
@@ -84,8 +82,6 @@ class NuriVisualizer extends PApplet {
 		
 		// use HSB color mode with low-res hue 
 		colorMode(HSB, 30, 100, 100);
-
-		startedSolving = false;
 	}
         
 	void setSizeToBoard(NuriState puz) {
@@ -136,12 +132,14 @@ class NuriVisualizer extends PApplet {
 
         drawLines(cellW, cellH, top, left, right, bottom);
 
-        // draw shadow lines for beveled look?
-        pushMatrix();
-        stroke(0, 0, 80); // light gray
-    	translate(1, 1);
-        drawLines(cellW, cellH, top, left, right, bottom);
-        popMatrix();
+        // draw shadow lines for etched look?
+        if (cellW >= prefCellSize) {
+	        pushMatrix();
+	        stroke(0, 0, 90); // light gray
+	    	translate(1, 1);
+	        drawLines(cellW, cellH, top, left, right, bottom);
+	        popMatrix();
+        }
         
         noStroke();
         for (i = 0; i < puz.getHeight(); i++) {
@@ -220,15 +218,6 @@ class NuriVisualizer extends PApplet {
 	}
 	
 	public void mouseClicked() {
-		go();
-	}
-	
-	void go() {
-		if (!startedSolving) {
-			drawGrid(puz);
-			startedSolving = true;
-			solver.start();
-		}
 	}
 	
 	//TODO: move these controls out of visualizer
@@ -259,7 +248,7 @@ class NuriVisualizer extends PApplet {
 			return;
 		}
 
-		go(); // start if not yet started
+		solver.maybeStart(); // start if not yet started
 
 		if (!solver.threadSuspended) {
 			synchronized(this) {
