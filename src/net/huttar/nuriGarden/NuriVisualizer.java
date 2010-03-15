@@ -47,8 +47,9 @@ class NuriVisualizer extends PApplet {
 	 */
 	private static final long serialVersionUID = -1306716595311291496L;
 
-	int margin = 10;
-
+	private int margin = 10;
+	private int prefCellSize = 32;
+	
 	NuriFrame frame = null;
 	NuriState puz = null;
 	NuriSolver solver = null;
@@ -151,6 +152,11 @@ class NuriVisualizer extends PApplet {
     
 	public void draw() {
 		// System.out.println("In draw() at " + System.currentTimeMillis()); // debugging
+		if (puz == null) {
+			puz = solver.latestBoard;
+			size(puz.getWidth() * prefCellSize + margin * 2,
+					puz.getHeight() * prefCellSize + margin * 2);
+		}
 		drawGrid(puz);
 		frame.updateStatus();
 	}

@@ -8,6 +8,7 @@ http://subclipse.tigris.org/servlets/ProjectProcess?pageID=p4wYuA
 
 Go to SVN Repositories perspective.
 - Add repository; URL: https://nurikabe-maker.svn.sourceforge.net/svnroot/nurikabe-maker
+- Expand that repository to show trunk, branches etc.
 - Right-click on 'trunk' folder; Checkout
  - as a project in the workspace; project name: NurikabeGarden
 
