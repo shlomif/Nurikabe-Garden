@@ -50,7 +50,7 @@ class NuriSolver extends Thread  {
 
 	volatile NuriState latestBoard = null; //B
 	
-	private NurikabeVisualizer visualizer = null; //B (or A)
+	private NuriVisualizer visualizer = null; //B (or A)
 
 	// boolean success = false; //B if needed (not currently)
 	
@@ -81,7 +81,7 @@ class NuriSolver extends Thread  {
 
 	/** Read specified puzzle from the given file. */
 	NuriSolver(NuriState board,
-			boolean debugMode, NurikabeVisualizer vis) {
+			boolean debugMode, NuriVisualizer vis) {
 		NuriSolver.debugMode = debugMode;
 		this.visualizer = vis;
 

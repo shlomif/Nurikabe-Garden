@@ -231,7 +231,7 @@ class NuriState implements Iterable<Coords>, Cloneable  {
 
 	/** Iterate through the cells in the grid. */
 	public Iterator<Coords> iterator() {
-		return new NurikabeIterator(this);
+		return new NurIterator(this);
 	}
 
 	/** Return the coordinates of all cells adjacent to a given cell. */

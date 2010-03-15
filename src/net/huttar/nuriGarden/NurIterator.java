@@ -2,7 +2,7 @@ package net.huttar.nuriGarden;
 import java.util.Iterator;
 
 /** Iterates through the cells of a NuriState puzzle. */
-public class NurikabeIterator implements Iterator<Coords> {
+public class NurIterator implements Iterator<Coords> {
 
 	private NuriState puzzle;
 	
@@ -10,7 +10,7 @@ public class NurikabeIterator implements Iterator<Coords> {
 	
 	int column;
 	
-	public NurikabeIterator(NuriState puzzle) {
+	public NurIterator(NuriState puzzle) {
 		super();
 		this.puzzle = puzzle;
 		row = 0;

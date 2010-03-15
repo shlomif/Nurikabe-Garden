@@ -40,7 +40,7 @@ import processing.core.PFont;
 
 import net.huttar.nuriGarden.NuriSolver.StopMode;
 
-class NurikabeVisualizer extends PApplet {
+class NuriVisualizer extends PApplet {
 
 	/**
 	 * 

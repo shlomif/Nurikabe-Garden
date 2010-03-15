@@ -24,7 +24,7 @@ public class NuriFrame extends Frame {
 	private NuriParser parser = null; //B
 	private NuriSolver solver = null;
 	private NuriState board = null;
-	private NurikabeVisualizer vis = null;
+	private NuriVisualizer vis = null;
 	private Label statusLabel = null;
 	
 	private void init() {
@@ -38,7 +38,7 @@ public class NuriFrame extends Frame {
 
         // For embedding Processing applet see
         // http://dev.processing.org/reference/core/javadoc/processing/core/PApplet.html
-        vis = new NurikabeVisualizer();
+        vis = new NuriVisualizer();
         vis.frame = this;
         add(vis, BorderLayout.CENTER);
         
