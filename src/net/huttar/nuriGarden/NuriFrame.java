@@ -32,11 +32,14 @@ public class NuriFrame extends Frame {
         vis = new NurikabeVisualizer();
         add(vis, BorderLayout.CENTER);
         
-        Label label = new Label("Nurikabe Garden");
-        add(label, BorderLayout.NORTH);
+        Label titleLabel = new Label("Nurikabe Garden");
+        add(titleLabel, BorderLayout.NORTH);
+
+        Label statusLabel = new Label("status");
+        add(statusLabel, BorderLayout.SOUTH);
 
         // TODO: get frame to properly surround PApplet.
-        setSize(600, 400);
+        setSize(600, 500);
         setResizable(true);
         // pack();
 

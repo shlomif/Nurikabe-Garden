@@ -3,6 +3,8 @@
  * what's happening, and more user control. UI is outside the scope of Processing.
  * Surround the Processing applet component with a regular Java GUI frame
  * or whatever. Probably not Swing -- I hear it's bloated. 
+ * TODO: during solving, turn on loop; when not solving, turn it off.
+ *  (but make sure redraw still occurs).
  * DONE: cache result of isSolved; pass it back and forth via setState; clear it when sthg changes
  * DONE: parse new file format (lgo_1500.txt)
  * DONE: visualize solving progress (colors of islands, etc.)

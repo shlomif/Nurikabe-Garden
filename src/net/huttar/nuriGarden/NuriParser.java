@@ -132,7 +132,9 @@ class NuriParser {
 				// System.out.println("ID: " + id + "; columns: " + columns + "; rows: " + rows);
 	
 				String puzzle = mr.group(4);
+				@SuppressWarnings("unused")
 				String solution = (mr.groupCount() >= 6) ? mr.group(6) : null;
+				@SuppressWarnings("unused")
 				String comment = (mr.groupCount() >= 8) ? mr.group(8) : null;
 				
 				// System.out.println("Puzzle: " + puzzle+ "\nSolution: " + solution + "\nComment: " + comment);
