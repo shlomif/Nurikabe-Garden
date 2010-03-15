@@ -14,49 +14,45 @@
  * Some of these will be influenced by the order in which
  * we call rules.
  */
-package nuriSolver;
+package net.huttar.nuriGarden;
 
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.List;
 
-import nurikabeVisualizer.NurikabeVisualizer;
 
-public class NuriSolver extends Thread  {
+class NuriSolver extends Thread  {
 	// For explanation of comments below of the form //A or B or C, see notes.txt
 
-	public enum StopMode { ONESTEP, STEPIN, STEPOVER, STEPOUT, CONTINUE, RESTART };
+	enum StopMode { ONESTEP, STEPIN, STEPOVER, STEPOUT, CONTINUE, RESTART };
 	
-	public volatile StopMode stopMode = StopMode.CONTINUE; //B (or A)
+	volatile StopMode stopMode = StopMode.CONTINUE; //B (or A)
 
 	/** Tells thread when to pause. */
-	public volatile boolean threadSuspended = false; //B (or A)
+	volatile boolean threadSuspended = false; //B (or A)
 	
 	/** Whether to output debug messages. */
-	private boolean debugMode = false; //A
+	private static boolean debugMode = false; //A
 	
 	/** Time the solving process started/ended. */
 	private long startTime = 0; //B
 	private long endTime = 0; //B
 
 	/** The last rule that was used for an inference. */
-	public volatile String lastRule; //B (strictly should be C, but for our purposes,
+	volatile String lastRule; //B (strictly should be C, but for our purposes,
 	// B is fine. If we need the accuracy, we could set it on return from recursion.)
 	
 	/** Coordinates of the last cell changed... for display purposes. */
-	public volatile Coords lastChangedCell = null; //B
+	volatile Coords lastChangedCell = null; //B
 	
 	/** State of board we're solving. */
 	private NuriState topBoard = null; //C
 
-	public volatile NuriState latestBoard = null; //B
+	volatile NuriState latestBoard = null; //B
 	
-	/** The parser object used to read in files. */
-	private NuriParser parser = null; //B
-
 	private NurikabeVisualizer visualizer = null; //B (or A)
 
-	// public boolean success = false; //B if needed (not currently)
+	// boolean success = false; //B if needed (not currently)
 	
 	/** "Rule" label for guesses. */
 	//TODO: check, is this actually useful?
@@ -84,24 +80,18 @@ public class NuriSolver extends Thread  {
 
 
 	/** Read specified puzzle from the given file. */
-	public NuriSolver(String filename, int i,
+	NuriSolver(NuriState board,
 			boolean debugMode, NurikabeVisualizer vis) {
-		this.debugMode = debugMode;
+		NuriSolver.debugMode = debugMode;
 		this.visualizer = vis;
 
-		if (parser == null)
-			parser = new NuriParser(filename, this);
-		
-		topBoard = parser.loadFile(i);
-
-		latestBoard = topBoard;
+		latestBoard = topBoard = board;
 	}
 
 	/** Read the specified puzzle, solve it, and verify the solution. */
 	/** Usage: java ClassName [-d] filename (minus ".puz") */
 	public static void main(String[] args) {
 		int fileArg = 0;
-		boolean debugMode = false;
 
 		if (args[0].equals("-d")) { debugMode = true; fileArg++; }
 		// if (args[fileArg].equals("-b")) {
@@ -109,10 +99,13 @@ public class NuriSolver extends Thread  {
 		//   TODO: process batch of puzzles
 		// }
 
-		NuriSolver solver = new NuriSolver(args[fileArg].indexOf('.') > -1 ?
-				args[fileArg] : args[fileArg] + ".puz", 0,
-				debugMode, null);
-		
+		NuriParser parser = new NuriParser(args[fileArg].indexOf('.') > -1 ?
+				args[fileArg] : args[fileArg] + ".puz");
+		NuriState board = parser.loadFile(182);
+
+		NuriSolver solver = new NuriSolver(board, true, null);
+		// board.setSolver(solver);
+				
 		System.out.println(solver.topBoard);
 
 		solver.solveWrapper();
@@ -124,7 +117,7 @@ public class NuriSolver extends Thread  {
 		solveWrapper();
 	}
 
-	public boolean solveWrapper() {
+	boolean solveWrapper() {
 		boolean success  = false;
 		startSolve();
 		try {
@@ -138,11 +131,11 @@ public class NuriSolver extends Thread  {
         return success;
 	}
 	
-	public void startSolve() {
+	void startSolve() {
 		startTime = System.currentTimeMillis();		
 	}
 
-	public void endSolve(boolean success) {
+	void endSolve(boolean success) {
 		if (success) {
 			endTime = System.currentTimeMillis();
 			System.out.println("Successfully solved puzzle in " + (endTime - startTime)
@@ -153,23 +146,30 @@ public class NuriSolver extends Thread  {
 		} else {
 			System.out.println("Unable to solve puzzle. I got this far:");
 			System.out.println(latestBoard);
-			debugMsg("Regions:");
+			debugMsg(searchDepth(), "Regions:");
 			latestBoard.debugDetails();
 		}
 	}
 
 	/** Output debugging message. */
-	public void debugMsg(String msg) {
+	static void debugMsg(String msg) {
+		if (debugMode) {
+			System.out.println("> " + msg);
+		}
+	}
+
+	/** Output debugging message. */
+	static void debugMsg(int depth, String msg) {
 		if (debugMode) {
 			// Is there an easier way to repeating a character n times?
-			for (int i = 0; i < searchDepth(); i++)
+			for (int i = 0; i < depth; i++)
 				System.out.print(' ');
-			System.out.println(searchDepth() + "> " + msg);
+			System.out.println(depth + "> " + msg);
 		}
 	}
 
 	/** Output progress metrics to debugging console or visualizer. */
-	public void showProgress(NuriState board) {
+	void showProgress(NuriState board) {
 		// if (visualizer != null) visualizer.draw();
 
 		/** From deep in a search, find innermost puzzle whose state was sure. */
@@ -184,12 +184,12 @@ public class NuriSolver extends Thread  {
 		int numCells = board.getWidth() * board.getHeight();
 		int numGuessed = numCells - board.numUnknownCells;
 		int numSure = numCells - lastSureBoard.numUnknownCells;
-		debugMsg("Progress: " + numSure + " (" + ((100 * numSure) / numCells) + "%) cells known, "
+		debugMsg(searchDepth(), "Progress: " + numSure + " (" + ((100 * numSure) / numCells) + "%) cells known, "
 				+ numGuessed + " (" + ((100 * numGuessed) / numCells) + "%) guessed or known.");
 	}
 
 	/** Solve the puzzle and return true if successful. */
-	public boolean solve(NuriState board) throws ContradictionException {
+	boolean solve(NuriState board) throws ContradictionException {
 		board.changed = true;
 		board.validityKnown = false;
 		
@@ -245,10 +245,10 @@ public class NuriSolver extends Thread  {
 		if (lastChangedCell == null)
 			lastChangedCell = new Coords(0, 0);
 		lastChangedCell.copy(cell);
-		debugMsg("Rule " + rule + ": " + cell + " = " + value);
+		debugMsg(searchDepth(), "Rule " + rule + ": " + cell + " = " + value);
 		board.set(cell, value);
 		board.setGuessLevel(cell, board.searchDepth);
-		debugMsg("\n" + cell.toString());
+		debugMsg(searchDepth(), "\n" + cell.toString());
 		checkControls();	// obey execution controls
 	}
 	
@@ -267,7 +267,7 @@ public class NuriSolver extends Thread  {
 		
 		String hypoth = "Hypothesis " + cell + " = '" + value + "'";
 		try {
-			debugMsg("Trying " + hypoth + "...");
+			debugMsg(searchDepth(), "Trying " + hypoth + "...");
 			infer(trialBoard, cell, value, hypothesisLabel);
 			/** TODO: Careful here... do we need to create a recursive instance
 			 * of solver? That's how we were doing it before...
@@ -425,7 +425,7 @@ public class NuriSolver extends Thread  {
 			// This just means that a region was added to or removed from the list
 			// we were iterating over. So bail out, and if necessary we'll get another
 			// chance to iterate over the lists again later.
-			debugMsg("Bailing out of rule3 on ConcurrentModificationException");
+			debugMsg(searchDepth(), "Bailing out of rule3 on ConcurrentModificationException");
 			return;
 		}
 	}
@@ -619,12 +619,12 @@ public class NuriSolver extends Thread  {
 			threadSuspended = true;
         try {
         	if (threadSuspended) {
-        		System.out.println("Suspending thread...");
+        		// System.out.println("Suspending thread...");
 	            synchronized(visualizer) {
 	                while (threadSuspended)
 	                    visualizer.wait();
 	            }
-	            System.out.println("Resuming thread...");
+	            // System.out.println("Resuming thread...");
         	}
         } catch (InterruptedException e){
         }

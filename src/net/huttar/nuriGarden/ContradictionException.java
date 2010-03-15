@@ -1,4 +1,4 @@
-package nuriSolver;
+package net.huttar.nuriGarden;
 /**
  * Exception raised when the state of cells in this puzzle lead to a
  * contradiction.

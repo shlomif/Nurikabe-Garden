@@ -1,8 +1,8 @@
-package nuriSolver;
+package net.huttar.nuriGarden;
 import java.util.*;
 
 /** A set of locations in a NuriState puzzle. */
-public class Region extends HashSet<Coords> {
+class Region extends HashSet<Coords> {
 
 	/** Eclipse says this class should have a serialVersionUID, so here it is. */
 	private static final long serialVersionUID = -6500576669930239666L;
@@ -11,14 +11,14 @@ public class Region extends HashSet<Coords> {
 	protected NuriState puzzle;
 
 	/** Create an empty Region. */
-	public Region(NuriState puzzle) {
+	Region(NuriState puzzle) {
 		this.puzzle = puzzle;
 	}
 
 	/**
 	 * Create a Region in puzzle containing cell.
 	 */
-	public Region(NuriState puzzle, Coords cell) {
+	Region(NuriState puzzle, Coords cell) {
 		this.puzzle = puzzle;
 		add(cell);
 	}
@@ -27,7 +27,7 @@ public class Region extends HashSet<Coords> {
 	 * Create a Region in puzzle containing cell and all contiguous cells with
 	 * labels in allowable.
 	 */
-	public Region(NuriState puzzle, Coords cell, String allowable) {
+	Region(NuriState puzzle, Coords cell, String allowable) {
 		this.puzzle = puzzle;
 		add(cell);
 		find(allowable);
@@ -65,7 +65,7 @@ public class Region extends HashSet<Coords> {
 
 	/** Return the set of cells adjacent to this Region with labels in allowable.
 	 * Result may include cells in this Region. */
-	public Region getNeighbors(String allowable) {
+	Region getNeighbors(String allowable) {
 		Region result = new Region(puzzle);
 		for (Coords cell : this) {
 			for (Coords neighbor : puzzle.neighbors(cell)) {
@@ -82,7 +82,7 @@ public class Region extends HashSet<Coords> {
 	 * in this Region.
 	 * 
 	 */
-	public Region getOnlyNeighbors() {
+	Region getOnlyNeighbors() {
 		Region result = new Region(puzzle);
 		for (Coords cell : this) {
 			for (Coords neighbor : puzzle.neighbors(cell)) {

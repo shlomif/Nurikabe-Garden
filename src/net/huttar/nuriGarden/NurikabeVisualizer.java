@@ -31,15 +31,14 @@
  * DONE: when user resizes window, resize grid squares accordingly. (but not font?) 
  */
 
-package nurikabeVisualizer;
+package net.huttar.nuriGarden;
 
 import processing.core.PApplet;
 import processing.core.PFont;
 
-import nuriSolver.*;
-import nuriSolver.NuriSolver.StopMode;
+import net.huttar.nuriGarden.NuriSolver.StopMode;
 
-public class NurikabeVisualizer extends PApplet {
+class NurikabeVisualizer extends PApplet {
 
 	/**
 	 * 
@@ -55,13 +54,13 @@ public class NurikabeVisualizer extends PApplet {
 	
 	public void setup() {
 		size(400, 400);
-		// Start with given file and debug mode.
 		
 		System.out.println(Runtime.getRuntime().availableProcessors());
 		
+		// Start with given file and debug mode.
 		// solver = new NuriSolver("../samples/lgo_1500.txt", 19, false, this);
 		// solver = new NuriSolver("../samples/tiny3.puz", 1, false, this);
-		solver = new NuriSolver("../samples/janko_ts.txt", 182, false, this);
+		// solver = new NuriSolver("samples/janko_ts.txt", 182, false, this);
 
 		frameRate(15);
 		PFont fontClue = loadFont("CourierNew36.vlw");
@@ -74,7 +73,7 @@ public class NurikabeVisualizer extends PApplet {
 		startedSolving = false;
 	}
         
-    public void drawGrid(NuriState puz) {
+    void drawGrid(NuriState puz) {
 		// System.out.println("In drawGrid() at " + System.currentTimeMillis()); // debugging
     	//TODO: need to add synchronization or sthg to make sure the board object doesn't disappear on us
     	// while we're accessing it.
@@ -156,7 +155,7 @@ public class NurikabeVisualizer extends PApplet {
 		go();
 	}
 	
-	public void go() {
+	void go() {
 		if (!startedSolving) {
 			drawGrid(puz);
 			startedSolving = true;
@@ -164,6 +163,7 @@ public class NurikabeVisualizer extends PApplet {
 		}
 	}
 	
+	//TODO: move these controls out of visualizer
 	public void keyPressed() {
 		System.out.println("Got key: " + key);
 
@@ -195,5 +195,9 @@ public class NurikabeVisualizer extends PApplet {
 	            this.notifyAll();					
 			}
 		}
+	}
+
+	void setSolver(NuriSolver s) {
+		solver = s;		
 	}
 }

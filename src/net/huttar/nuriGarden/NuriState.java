@@ -1,4 +1,4 @@
-package nuriSolver;
+package net.huttar.nuriGarden;
 /** DONE: keep a static member pointing to the "current" NuriState board (or its grid) */
 /** TODO: use multiple threads (depending on # of processors available) to
  * investigate multiple lines of backtracking simultaneously.
@@ -50,36 +50,38 @@ package nuriSolver;
 import java.io.*;
 import java.util.*;
 
-import nuriSolver.NuriSolver;
+import net.huttar.nuriGarden.NuriSolver;
 
 /** Program to solve NuriState puzzles. 
  * A "NuriState" instance represents a board state.
  * Used to be one class with NuriSolver, named Nurikabe, but I split it up. */
-public class NuriState implements Iterable<Coords>, Cloneable  { 
+class NuriState implements Iterable<Coords>, Cloneable  { 
 	/** Character for a filled-in cell. */
-	public static final char BLACK = '#';
+	static final char BLACK = '#';
 
 	/** Character for a cell known to be white. */
-	public static final char WHITE = '.';
+	static final char WHITE = '.';
 
 	/** Character for a cell of unknown status. */
-	public static final char UNKNOWN = '?';
+	static final char UNKNOWN = '?';
 
 	/** Allowed number characters: 1 to 35, base 36 */
-	public static final String NUMBERS = "123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	static final String NUMBERS = "123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 	
-	/** The solver using this board state. */
-	private NuriSolver solver;
+//	/** The solver using this board state. */
+//	private NuriSolver solver;
+//	
+//	void setSolver(NuriSolver s) { solver = s; }
 	
 	/** Depth of recursive search. */
-	public short searchDepth;
+	short searchDepth;
 
 	/* For use as an API (e.g. from visualizer).
 	 * Read or create a puzzle and return it as an object.
 	 * i is index of puzzle in the file (1-based).
 	 */
 	/* Obsolete.
-	public static NuriState init(String filename, int i, NuriSolver solver) {
+	static NuriState init(String filename, int i, NuriSolver solver) {
 		NuriState.debug = debug; 
 		NuriState puzzle = new NuriState(filename, i);
 		puzzle.solver = solver;
@@ -122,8 +124,7 @@ public class NuriState implements Iterable<Coords>, Cloneable  {
 	/** The puzzle that this puzzle is a hypothesis branch from. */
 	NuriState predecessor = null;
 	
-	public NuriState(NuriSolver s) {
-		solver = s;
+	NuriState() {
 	}
 
 	void setState(char[][] grid, ArrayList<UCRegion> blackRegions,
@@ -157,7 +158,7 @@ public class NuriState implements Iterable<Coords>, Cloneable  {
 		expBlackCount = getHeight() * getWidth() - expWhiteCount;
 		// initially all cells are unknown except the seeds (numbered cells)
 		numUnknownCells = getHeight() * getWidth() - whiteRegions.size();
-		solver.debugMsg("expWhiteCount: " + expWhiteCount + "; expBlackCount: "
+		NuriSolver.debugMsg("expWhiteCount: " + expWhiteCount + "; expBlackCount: "
 				+ expBlackCount + "; numUnknownCells: " + numUnknownCells);
 	}
 
@@ -183,32 +184,32 @@ public class NuriState implements Iterable<Coords>, Cloneable  {
 	}
 
 	/** Return the label at a particular location. */
-	public char get(Coords cell) {
+	char get(Coords cell) {
 		return grid[cell.getRow()][cell.getColumn()];
 	}
 
 	/** Return the cell value at a particular location. */
-	public char get(int r, int c) {
+	char get(int r, int c) {
 		return grid[r][c];
 	}
 
 	/** Return the label at a particular location. */
-	public short getGuessLevel(int r, int c) {
+	short getGuessLevel(int r, int c) {
 		return guessLevel[r][c];
 	}
 
 	/** Return the number of rows in the puzzle. */
-	public int getHeight() {
+	int getHeight() {
 		return grid.length;
 	}
 
 	/** Return the number of columns in the puzzle. */
-	public int getWidth() {
+	int getWidth() {
 		return grid[0].length;
 	}
 
 	/** Return true if the given character is a digit (1-9A-Z). */
-	public static boolean isANumber(char c) {
+	static boolean isANumber(char c) {
 		return NUMBERS.indexOf(c) >= 0;
 	}
 
@@ -218,7 +219,7 @@ public class NuriState implements Iterable<Coords>, Cloneable  {
 	}
 
 	/** Return true if the given character is white or is a digit (1-9). */
-	static public boolean isWhite(char c) {
+	static boolean isWhite(char c) {
 		return c == WHITE || isANumber(c);
 	}
 	
@@ -274,7 +275,7 @@ public class NuriState implements Iterable<Coords>, Cloneable  {
 	protected UCRegion addToARegion(Coords cell) throws ContradictionException {
 		HashSet<UCRegion> neighborRegions = new HashSet<UCRegion>();
 		char content = get(cell);
-		solver.debugMsg("Adding cell " + cell + "(" + content + ") to a region");
+		NuriSolver.debugMsg(searchDepth, "Adding cell " + cell + "(" + content + ") to a region");
 		// Using immediate neighbors of cell, 
 		// make collection of neighbors' regions of needed color
 		for (Coords neighbor : neighbors(cell)) {
@@ -287,7 +288,7 @@ public class NuriState implements Iterable<Coords>, Cloneable  {
 		Iterator<UCRegion> iter = neighborRegions.iterator();
 		UCRegion firstRegion = !neighborRegions.isEmpty() ? (UCRegion)iter.next() : null;
 		List<UCRegion> puzzleColorRegions = (content == WHITE ? whiteRegions : blackRegions);
-		solver.debugMsg("  found " + neighborRegions.size() + " neighbor regions of same color");
+		NuriSolver.debugMsg(searchDepth, "  found " + neighborRegions.size() + " neighbor regions of same color");
 		switch (neighborRegions.size()) {
 		case 0:
 			// If no available regions, create one.
@@ -313,7 +314,7 @@ public class NuriState implements Iterable<Coords>, Cloneable  {
 		}
 	}
 	
-	public int numUnknownCells = 0;
+	int numUnknownCells = 0;
 	
 	void setGuessLevel(Coords cell, short gl) {
 		guessLevel[cell.getRow()][cell.getColumn()] = gl;
@@ -436,7 +437,7 @@ public class NuriState implements Iterable<Coords>, Cloneable  {
 	/** Return mostly-deep copy of puzzle.
 	 * Grid and regions are copied by their contents.
 	 */
-	public Object clone() {
+	protected Object clone() {
 		NuriState newPuzzle = null;
 		try {
 			newPuzzle = (NuriState)super.clone();
@@ -477,7 +478,7 @@ public class NuriState implements Iterable<Coords>, Cloneable  {
 		return toString(null);
 	}
 	
-	public String toString(Coords modified) {
+	String toString(Coords modified) {
 		StringBuilder result = new StringBuilder();
 		StringBuilder indent = new StringBuilder();
 		for (int i = 0; i < searchDepth; i++)
@@ -511,7 +512,7 @@ public class NuriState implements Iterable<Coords>, Cloneable  {
 	 * solution is a correct (valid) solution.
 	 * Otherwise throw ContradictionException.
 	 */
-	public boolean isValid() throws ContradictionException {
+	boolean isValid() throws ContradictionException {
 		if (validityKnown) return validity; // skip the unnecessary computations!
 		
 		// It will be known by the time we return from this method or throw an exception.
@@ -582,7 +583,7 @@ public class NuriState implements Iterable<Coords>, Cloneable  {
 	 * Return true if the current state of this puzzle is the same as the
 	 * solution in the file.
 	 */
-	public boolean checkSolution(String filename) {
+	boolean checkSolution(String filename) {
 		if (filename.endsWith(".puz"))
 			filename = filename.substring(0, filename.length() - 3) + "sol";
 		try {
@@ -610,18 +611,18 @@ public class NuriState implements Iterable<Coords>, Cloneable  {
 		}
 	}
 
-	public void debugDetails() {
+	void debugDetails() {
 		for (UCRegion region : whiteRegions)
-			solver.debugMsg(region.toString());
+			NuriSolver.debugMsg(searchDepth, region.toString());
 		for (UCRegion region : blackRegions)
-			solver.debugMsg(region.toString());
+			NuriSolver.debugMsg(searchDepth, region.toString());
 	}
 
 	/** Return true iff the content of the specified cell
 	 * is already equivalent to the given value.
 	 * (White value is equivalent to numbers.)
 	 */
-	public boolean alreadyIs(Coords cell, char value) {
+	boolean alreadyIs(Coords cell, char value) {
 		return (unifyWhite(get(cell)) == unifyWhite(value));
 	}
 }

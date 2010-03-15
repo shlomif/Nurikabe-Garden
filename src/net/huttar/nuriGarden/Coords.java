@@ -1,21 +1,21 @@
-package nuriSolver;
-public class Coords {
+package net.huttar.nuriGarden;
+class Coords {
 
 	private int row;
 
 	private int column;
 
-	public Coords(int r, int c) {
+	Coords(int r, int c) {
 		row = r;
 		column = c;
 	}
 
-	public int getRow() {
+	int getRow() {
 		return row;
 	}
 	
 	/** Return Manhattan distance between this cell and another. */
-	public int manhattanDist(Coords cell) {
+	int manhattanDist(Coords cell) {
 		return Math.abs(row - cell.row) + Math.abs(column - cell.column);
 	}
 
@@ -23,7 +23,7 @@ public class Coords {
 		return "<" + row + "," + column + ">";
 	}
 	
-	public int getColumn() {
+	int getColumn() {
 		return column;
 	}
 
@@ -46,7 +46,7 @@ public class Coords {
 	}
 
 	/** set coords of this to given cell */ 
-	public void copy(Coords cell) {
+	void copy(Coords cell) {
 		row = cell.row;
 		column = cell.column;
 	}

@@ -12,7 +12,9 @@ Go to SVN Repositories perspective.
  - as a project in the workspace; project name: NurikabeGarden
 
 Switch to Java (dev) perspective
-In package explorer, open src/nurikabeVisualizer/NurikabeVisualizer.java
-  Edit setup to load an existing file in samples/*; save
+In package explorer, open src/net.huttar.nuriGarden/NuriFrame.java
+  Edit init() to load an existing file in samples/*:
+  		parser = new NuriParser("samples/huttar_ts.txt");
+		board = parser.loadFile(182); // index of puzzle
   Press F11 to build and run.
 

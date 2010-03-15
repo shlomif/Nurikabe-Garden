@@ -1,7 +1,8 @@
+package net.huttar.nuriGarden;
+
 /**
  * 
  */
-package nuriSolver;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -11,21 +12,23 @@ import java.util.regex.Pattern;
 
 
 /**
+ * NuriParser: load a nurikabe puzzle from a file.
+ * Note that one parser <---> one file; you will be able to
+ * load multiple puzzles from the same file by reusing the same
+ * parser.
+ *  
  * @author Lars Huttar, lars at huttar dot net
  *
  */
-public class NuriParser {
+class NuriParser {
 	private String filename = null;
 	
-	private NuriSolver solver = null;
-	
-	public NuriParser(String fn, NuriSolver s) {
+	NuriParser(String fn) {
 		filename = fn;
-		solver = s;
 	}
 
 	NuriState loadFile(int i) {
-		NuriState puz = new NuriState(solver);
+		NuriState puz = new NuriState();
 		if (filename.endsWith(".puz"))
 			loadPuz(puz, filename);
 		else
@@ -126,13 +129,13 @@ public class NuriParser {
 				String id = mr.group(1);
 				short columns = Short.parseShort(mr.group(2));
 				short rows = Short.parseShort(mr.group(3));
-				solver.debugMsg("ID: " + id + "; columns: " + columns + "; rows: " + rows);
+				// System.out.println("ID: " + id + "; columns: " + columns + "; rows: " + rows);
 	
 				String puzzle = mr.group(4);
 				String solution = (mr.groupCount() >= 6) ? mr.group(6) : null;
 				String comment = (mr.groupCount() >= 8) ? mr.group(8) : null;
 				
-				solver.debugMsg("Puzzle: " + puzzle+ "\nSolution: " + solution + "\nComment: " + comment);
+				// System.out.println("Puzzle: " + puzzle+ "\nSolution: " + solution + "\nComment: " + comment);
 	
 				puz.newGrid(rows, columns);
 				
@@ -154,6 +157,7 @@ public class NuriParser {
 				
 			} catch (IOException e) {
 				e.printStackTrace();
+				System.out.println("Current dir: " + System.getProperty("user.dir"));
 				System.exit(1);
 			}		
 		}

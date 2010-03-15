@@ -1,4 +1,4 @@
-package nuriSolver;
+package net.huttar.nuriGarden;
 // import java.util.ArrayList;
 
 /*
@@ -9,7 +9,7 @@ package nuriSolver;
  * Uniform Contiguous Region: a contiguous region consisting of all-white
  * or all-black cells.
  */
-public class UCRegion extends Region implements Cloneable {
+class UCRegion extends Region implements Cloneable {
 	/**
 	 * 
 	 */
@@ -21,38 +21,38 @@ public class UCRegion extends Region implements Cloneable {
 	private char contentType;
 	/** Number of cells this ucRegion can hold. If zero, limit is unknown. */
 	private int limit = 0;
-	public short r = 255, g = 255, b = 255; // color, for visualization
+	short r = 255, g = 255, b = 255; // color, for visualization
 	
 	/** Return number of cells this ucRegion can hold. If zero, limit is unknown. */
-	public int getLimit() {
+	int getLimit() {
 		return limit;
 	}
 	/** For white regions, the cell containing the number, if any. */
 	private Coords numberedCell = null;
 	/** Return the numbered cell. */
-	public Coords getNumberedCell() {
+	Coords getNumberedCell() {
 		return numberedCell;
 	}
 	
 	/** Return content type of this ucRegion. */
-	public char getContentType() {
+	char getContentType() {
 		return contentType;
 	}
 
 	/** Return true if this ucRegion wants more cells. */
-	public boolean isHungry() {
+	boolean isHungry() {
 		return limit == 0 || size() < limit;
 	}
 	
 	/** Return number of cells this region wants (-1 if unknown) */
-	public int getHunger() {
+	int getHunger() {
 		return (limit == 0) ? -1 : (limit - size());
 	}
 	
 	/** Create an empty UCRegion that can only hold cells of
 	 * the given content type.
 	 */
-	public UCRegion(NuriState puzzle, char type) {
+	UCRegion(NuriState puzzle, char type) {
 		super(puzzle);
 		contentType = type;
 		if (type == NuriState.BLACK) {
@@ -69,7 +69,7 @@ public class UCRegion extends Region implements Cloneable {
 	/** Create a UCRegion in puzzle consisting of cell. The region's contentType
 	 * is determined by the contents of cell.
 	 */ 
-	public UCRegion(NuriState puzzle, Coords cell) {
+	UCRegion(NuriState puzzle, Coords cell) {
 		super(puzzle);
 		char content = puzzle.get(cell);
 		contentType = NuriState.isANumber(content) ? NuriState.WHITE : content;
@@ -85,7 +85,7 @@ public class UCRegion extends Region implements Cloneable {
 	
 	/** Add given cell to this region and perform consistency checks.
 	 * If set is true, set the given cell to the appropriate value. */
-	public boolean addCell(Coords cell, boolean set) throws ContradictionException {
+	boolean addCell(Coords cell, boolean set) throws ContradictionException {
 		char content = puzzle.get(cell);
 		if (!isHungry())
 			throw new ContradictionException("Tried to add " + cell + " to full region.");
@@ -107,12 +107,12 @@ public class UCRegion extends Region implements Cloneable {
 
 	/** Add given cell to this region and perform consistency checks. 
 	 * Cell content is assumed to be of the right type for this UCRegion. */
-	public boolean addCell(Coords cell) throws ContradictionException {
+	boolean addCell(Coords cell) throws ContradictionException {
 		return addCell(cell, false);
 	}
 	
 	/** Add all cells of given region to this region, performing consistency checks. */
-	public boolean addAllCells(UCRegion newRegion) throws ContradictionException {
+	boolean addAllCells(UCRegion newRegion) throws ContradictionException {
 		if (!this.isHungry() || !newRegion.isHungry())
 			throw new ContradictionException("Tried to add a UCRegion to a full UCRegion: " + this + ", " + newRegion);
 		if (newRegion.contentType != this.contentType)
@@ -146,7 +146,7 @@ public class UCRegion extends Region implements Cloneable {
 	}
 	
 	/** Set puzzle context (after cloning). */
-	public void setState(NuriState puzzle) {
+	void setState(NuriState puzzle) {
 		this.puzzle = puzzle;
 	}
 	

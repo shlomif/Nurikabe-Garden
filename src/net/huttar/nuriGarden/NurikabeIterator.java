@@ -1,4 +1,4 @@
-package nuriSolver;
+package net.huttar.nuriGarden;
 import java.util.Iterator;
 
 /** Iterates through the cells of a NuriState puzzle. */
