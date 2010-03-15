@@ -35,6 +35,8 @@
 
 package net.huttar.nuriGarden;
 
+import java.awt.Dimension;
+
 import processing.core.PApplet;
 import processing.core.PFont;
 
@@ -47,8 +49,8 @@ class NuriVisualizer extends PApplet {
 	 */
 	private static final long serialVersionUID = -1306716595311291496L;
 
-	private int margin = 10;
-	private int prefCellSize = 32;
+	private final int margin = 10;
+	private final int prefCellSize = 32;
 	
 	NuriFrame frame = null;
 	NuriState puz = null;
@@ -57,7 +59,8 @@ class NuriVisualizer extends PApplet {
 	boolean startedSolving = false;
 	
 	public void setup() {
-		size(400, 400);
+		size(400, 400); // default
+		if (puz != null) setSizeToBoard(puz);
 		
 		System.out.println(Runtime.getRuntime().availableProcessors());
 		
@@ -77,6 +80,13 @@ class NuriVisualizer extends PApplet {
 		startedSolving = false;
 	}
         
+	void setSizeToBoard(NuriState puz) {
+		int prefW = puz.getWidth() * prefCellSize + margin * 2;
+		int prefH = puz.getHeight() * prefCellSize + margin * 2; 
+		setPreferredSize(new Dimension(prefW, prefH));
+		size(prefW, prefH);
+	}
+	
     void drawGrid(NuriState puz) {
 		// System.out.println("In drawGrid() at " + System.currentTimeMillis()); // debugging
     	//TODO: need to add synchronization or sthg to make sure the board object doesn't disappear on us
@@ -154,8 +164,7 @@ class NuriVisualizer extends PApplet {
 		// System.out.println("In draw() at " + System.currentTimeMillis()); // debugging
 		if (puz == null) {
 			puz = solver.latestBoard;
-			size(puz.getWidth() * prefCellSize + margin * 2,
-					puz.getHeight() * prefCellSize + margin * 2);
+			setSizeToBoard(puz);
 		}
 		drawGrid(puz);
 		frame.updateStatus();
@@ -196,6 +205,9 @@ class NuriVisualizer extends PApplet {
 			solver.stopMode = StopMode.RESTART;
 			solver.threadSuspended = false;
 			break;
+		default:
+			System.out.println("Unknown key " + key);
+			return;
 		}
 
 		go(); // start if not yet started

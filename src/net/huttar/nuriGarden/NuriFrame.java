@@ -4,18 +4,24 @@ package net.huttar.nuriGarden;
 //import java.awt.Frame;
 import java.awt.BorderLayout;
 import java.awt.Container;
+// import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 // import java.awt.Insets;
 //import java.awt.Label;
 // Using Swing:
 // import java.awt.GridLayout;
 
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
+// import javax.swing.JPanel;
 import javax.swing.BorderFactory;
-import javax.swing.border.EmptyBorder;
+// import javax.swing.border.Border;
+// import javax.swing.border.EmptyBorder;
 import javax.swing.JMenuBar;
 
 /** 
@@ -26,12 +32,12 @@ import javax.swing.JMenuBar;
  *
  */
 // AWT: 	public class NuriFrame extends Frame {
-public class NuriFrame extends JFrame {
+public class NuriFrame extends JFrame implements ActionListener {
 
 	private static final long serialVersionUID = 1L;
 
 	public NuriFrame() {
-        super("Nurikabe garden");
+        super("Nurikabe Garden");
     }
 
 	/** The parser object used to read in files. */
@@ -49,19 +55,27 @@ public class NuriFrame extends JFrame {
 		JMenuBar menu = new JMenuBar();
 		panel.add(menu, BorderLayout.NORTH);
 		
-		JPanel buttonPanel = new JPanel();
-		BoxLayout boxLayout = new BoxLayout(buttonPanel, BoxLayout.Y_AXIS);
-		buttonPanel.setLayout(boxLayout);
+		Box buttonPanel = new Box(BoxLayout.Y_AXIS);
+		// BoxLayout boxLayout = new BoxLayout(buttonPanel, BoxLayout.Y_AXIS);
+		// buttonPanel.setLayout(boxLayout);
 		panel.add(buttonPanel, BorderLayout.EAST);
-
+		buttonPanel.setBorder(BorderFactory.createEtchedBorder());
+		
 		JButton solveButton = new JButton("Solve");
-		solveButton.setMnemonic('s');
+		solveButton.setMnemonic(KeyEvent.VK_S);
+		solveButton.setActionCommand("solve");
+		solveButton.addActionListener(this);
 		buttonPanel.add(solveButton);
+		
+		// space between buttons
+		buttonPanel.add(Box.createVerticalStrut(6));
 
 		JButton quitButton = new JButton("Quit");
-		solveButton.setMnemonic('q');
+		quitButton.setMnemonic(KeyEvent.VK_Q);
+		quitButton.setActionCommand("quit"); // System.exit(1);
+		quitButton.addActionListener(this);
 		buttonPanel.add(quitButton);
-		
+
         // panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         // panel.setLayout(new GridLayout(5, 4, 5, 5));
 
@@ -88,7 +102,7 @@ public class NuriFrame extends JFrame {
         // TODO: parameterize; or get from a File Open dlg
 		parser = new NuriParser("samples/janko_ts.txt");
 		board = parser.loadFile(182);
-
+		
 		solver = new NuriSolver(board, true, vis);
 		// board.setSolver(solver);
 		vis.setSolver(solver);
@@ -105,6 +119,7 @@ public class NuriFrame extends JFrame {
         // It ensures that the animation thread is started and
         // that other internal variables are properly set.
         vis.init();
+		// vis.setSizeToBoard(board); // no effect
 	}
 
 	/** Update status display.
@@ -120,6 +135,13 @@ public class NuriFrame extends JFrame {
 		}
 	}
 	
+   public void actionPerformed(ActionEvent e) {
+        if ("solve".equals(e.getActionCommand())) {
+        } else if ("quit".equals(e.getActionCommand())) {
+        	System.exit(1);
+        }
+    }
+
 	public static void main(String[] args) {
 		NuriFrame nf = new NuriFrame();
 		nf.init();
