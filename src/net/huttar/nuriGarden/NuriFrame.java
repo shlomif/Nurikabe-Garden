@@ -48,6 +48,8 @@ public class NuriFrame extends JFrame implements ActionListener {
 
 	private JLabel statusLabel, depthLabel;
 	
+	private JButton solveButton;
+	
 	private void init() {
 		// helpful: see http://zetcode.com/tutorials/javaswingtutorial/swinglayoutmanagement/
 		Container panel = this.getContentPane();
@@ -61,7 +63,7 @@ public class NuriFrame extends JFrame implements ActionListener {
 		panel.add(buttonPanel, BorderLayout.EAST);
 		buttonPanel.setBorder(BorderFactory.createEtchedBorder());
 		
-		JButton solveButton = new JButton("Solve");
+		solveButton = new JButton("Solve");
 		solveButton.setMnemonic(KeyEvent.VK_S);
 		solveButton.setToolTipText("Attempt to solve the puzzle uniquely");
 		solveButton.setActionCommand("solve");
@@ -159,11 +161,32 @@ public class NuriFrame extends JFrame implements ActionListener {
 		depthLabel.setText("Search depth: " + solver.searchDepth());
 	}
 	
-   public void actionPerformed(ActionEvent e) {
+	public void actionPerformed(ActionEvent e) {
         if ("solve".equals(e.getActionCommand())) {
         	solver.maybeStart();
+        	solveButton.setEnabled(false);
+        	vis.loop();
         } else if ("quit".equals(e.getActionCommand())) {
         	System.exit(1);
+        } else if ("reset".equals(e.getActionCommand())) {
+        	/** Don't let the solver thread or visualizer
+        	 * access the board or solver while they're null.
+        	 */
+        	synchronized(vis) {
+        		solver.threadSuspended = true;
+        		solver.stopMode = NuriSolver.StopMode.EXIT;
+        		vis.noLoop();
+	        	solver = null;
+	        	vis.setSolver(null);
+	        	board = board.resetCopy();
+	    		solver = new NuriSolver(board, false, vis);
+	    		vis.setSolver(solver);
+	    		vis.puz = board;
+	    		vis.redraw();
+	        	solveButton.setEnabled(true);
+        	}
+    		statusLabel.setText("Board cleared.");
+    		depthLabel.setText("");
         } else {
         	// assert(false); // unrecognized action event
         }
@@ -172,6 +195,5 @@ public class NuriFrame extends JFrame implements ActionListener {
 	public static void main(String[] args) {
 		NuriFrame nf = new NuriFrame();
 		nf.init();
-	}
-    
+	}    
 }

@@ -52,7 +52,7 @@ class NuriParser {
 				for (int c = 0; c < columns; c++) {
 					char symbol = lines.get(r).charAt(c);
 					// grid[r][c] = (symbol == WHITE) ? UNKNOWN : symbol;
-					puz.initialize(r, c,
+					puz.initializeCell(r, c,
 							(symbol == NuriState.WHITE || symbol == '-') ? NuriState.UNKNOWN : symbol);
 				}
 			}
@@ -65,7 +65,7 @@ class NuriParser {
 
 	/*
 		 * TODO: make parser work when solution is absent
-		 * TODO: make parser expect ID
+		 * DONE: make parser expect ID
 		 * TODO: make parser able to select puzzle from a file by ID
 		 */
 		
@@ -145,10 +145,10 @@ class NuriParser {
 					for (int c = 0; c < columns; c++) {
 						char ch = puzzle.charAt(r * columns + c);
 						if (ch == '-' || ch == '?') {
-							puz.initialize(r, c, NuriState.UNKNOWN);
+							puz.initializeCell(r, c, NuriState.UNKNOWN);
 						} else if (ch == NuriState.WHITE || ch == NuriState.BLACK ||
 								NuriState.isANumber(ch)) {
-							puz.initialize(r, c, ch);
+							puz.initializeCell(r, c, ch);
 						} else {
 							throw new IOException("Unrecognized character " + ch + " in puzzle " + id);
 						}

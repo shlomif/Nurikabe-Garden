@@ -108,7 +108,6 @@ class NuriVisualizer extends PApplet {
 		// System.out.println("In drawGrid() at " + System.currentTimeMillis()); // debugging
     	//TODO: probably need to add synchronization or sthg to make sure the board object doesn't disappear on us
     	// while we're accessing it.
-    	puz = solver.latestBoard;
     	int left = 0, top = 0, margin = 10;
     	int cellW = (width - margin * 2) / puz.getWidth();
     	int cellH = (height - margin * 2) / puz.getHeight();
@@ -161,7 +160,7 @@ class NuriVisualizer extends PApplet {
         	}
         }
         
-        if (solver.lastChangedCell != null) {
+        if (solver != null && solver.lastChangedCell != null) {
 	        stroke((float) 5.1, 85, 100); // yellow
 	        noFill();
 	        strokeWeight((float) (cellW * 0.1));
@@ -209,12 +208,16 @@ class NuriVisualizer extends PApplet {
     
 	public void draw() {
 		// System.out.println("In draw() at " + System.currentTimeMillis()); // debugging
-		if (puz == null) {
-			puz = solver.latestBoard;
-			setSizeToBoard(puz);
+		if (solver != null) {
+			if (puz == null) {
+				puz = solver.latestBoard;
+				setSizeToBoard(puz);
+			}
+			if (puz != null) {
+				drawGrid(puz);
+				frame.updateStatus();
+			}
 		}
-		drawGrid(puz);
-		frame.updateStatus();
 	}
 	
 	public void mouseClicked() {
@@ -239,9 +242,20 @@ class NuriVisualizer extends PApplet {
 			solver.stopMode = StopMode.CONTINUE;
 			solver.threadSuspended = false;
 			break;
-		case 'r':
-			solver.stopMode = StopMode.RESTART;
-			solver.threadSuspended = false;
+		case 'i':
+		case 'I':
+			solver.stopMode = StopMode.STEPIN;
+			solver.setStepStopDepth(1);
+			break;
+		case 'u':
+		case 'U':
+			solver.stopMode = StopMode.STEPOUT;
+			solver.setStepStopDepth(-1);
+			break;
+		case 'v':
+		case 'V':
+			solver.stopMode = StopMode.STEPOVER;
+			solver.setStepStopDepth(0);
 			break;
 		default:
 			System.out.println("Unknown key " + key);

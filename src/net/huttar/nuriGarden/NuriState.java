@@ -157,6 +157,7 @@ class NuriState implements Iterable<Coords>, Cloneable  {
 		}
 		expBlackCount = getHeight() * getWidth() - expWhiteCount;
 		// initially all cells are unknown except the seeds (numbered cells)
+		// TODO: that may not be true if we load a half-solved board.
 		numUnknownCells = getHeight() * getWidth() - whiteRegions.size();
 		NuriSolver.debugMsg("expWhiteCount: " + expWhiteCount + "; expBlackCount: "
 				+ expBlackCount + "; numUnknownCells: " + numUnknownCells);
@@ -168,6 +169,21 @@ class NuriState implements Iterable<Coords>, Cloneable  {
 	 */
 	int getExpBlackCount() {
 		return expBlackCount;
+	}
+
+	/** Create a new board with only the numbers from this board,
+	 * and the rest unknown. */
+	public NuriState resetCopy() {
+		NuriState newBoard = new NuriState();
+		newBoard.newGrid(getHeight(), getWidth());
+		for (Coords cell : this) {
+			if (isANumber(get(cell)))
+				newBoard.grid[cell.getRow()][cell.getColumn()] = get(cell);
+			else
+				newBoard.grid[cell.getRow()][cell.getColumn()] = UNKNOWN;
+		}
+		newBoard.prepareStats();
+		return newBoard;
 	}
 
 	/**
@@ -257,7 +273,9 @@ class NuriState implements Iterable<Coords>, Cloneable  {
 		return result;
 	}
 
-	/** Return the region containing the given cell. */
+	/** Return the region containing the given cell.
+	 * TODO: Optimize; maybe a spatial index or something.
+	 * Or a hash table. Where is this used? only in prepareStats()? */
 	protected UCRegion containingRegion(Coords cell) {
 		List<UCRegion> regions;
 		char content = get(cell);
@@ -427,7 +445,7 @@ class NuriState implements Iterable<Coords>, Cloneable  {
 	 * @param c: column of cell
 	 * @param value: new value
 	 */
-	void initialize(int r, int c, char value) {
+	void initializeCell(int r, int c, char value) {
 		grid[r][c] = value;
 	}
 

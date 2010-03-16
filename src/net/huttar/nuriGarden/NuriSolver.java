@@ -24,7 +24,7 @@ import java.util.List;
 class NuriSolver extends Thread  {
 	// For explanation of comments below of the form //A or B or C, see notes.txt
 
-	enum StopMode { ONESTEP, STEPIN, STEPOVER, STEPOUT, CONTINUE, RESTART };
+	enum StopMode { ONESTEP, STEPIN, STEPOVER, STEPOUT, CONTINUE, RESTART, EXIT };
 	
 	volatile StopMode stopMode = StopMode.CONTINUE; //B (or A)
 
@@ -52,6 +52,8 @@ class NuriSolver extends Thread  {
 	
 	private NuriVisualizer visualizer = null; //B (or A)
 
+	private short stepStopDepth = -1;
+
 	// boolean success = false; //B if needed (not currently)
 	
 	/** "Rule" label for guesses. */
@@ -59,7 +61,7 @@ class NuriSolver extends Thread  {
 	private static final String hypothesisLabel = "[guess]"; //A
 	
 	/** Max depth of recursive search. */
-	static private int maxSearchDepth = 0; //B
+	private int maxSearchDepth = 0; //B
 
 	/** Depth of recursive search. */
 	short searchDepth() {
@@ -70,13 +72,13 @@ class NuriSolver extends Thread  {
 	}
 	
 	/** Number of hypotheses tried through all instances of this class. */
-	static private int totalHypotheses = 0; //B
+	private int totalHypotheses = 0; //B
 
 	/** Number of inferences made through all instances of this class. */
-	static private int totalInferences = 0; //B
+	private int totalInferences = 0; //B
 
 	/** Rule 0 only has to be run once, since numbered cells don't change. */
-	private static boolean ranRule0 = false; //B
+	private boolean ranRule0 = false; //B
 
 
 	/** Read specified puzzle from the given file. */
@@ -255,7 +257,8 @@ class NuriSolver extends Thread  {
 		board.set(cell, value);
 		board.setGuessLevel(cell, board.searchDepth);
 		debugMsg(searchDepth(), "\n" + cell.toString());
-		checkControls();	// obey execution controls
+		//##TODO: fix these booleans regarding stepping in, out
+		checkControls(false, false);	// obey execution controls
 	}
 	
 	/** Put the given value in the given cell and recursively try to solve the puzzle.
@@ -620,9 +623,30 @@ class NuriSolver extends Thread  {
 	/** Check whether we need to pause this thread.
 	 * See http://java.sun.com/javase/7/docs/technotes/guides/concurrency/threadPrimitiveDeprecation.html
 	 */
-	private void checkControls() {
-		if (stopMode == StopMode.ONESTEP)
+	private void checkControls(boolean steppingIn, boolean steppingOut) {
+//		switch (stopMode) {
+//		case ONESTEP:
+//			threadSuspended = true;
+//			break;
+//		case STEPIN:
+//			if (steppingIn && stepStopDepth == searchDepth()) threadSuspended = true;
+//			break;
+//		case STEPOUT:
+//			if (steppingOut && stepStopDepth == searchDepth()) threadSuspended = true;
+//			break;
+//		case STEPOVER:
+//			if (stepStopDepth == searchDepth())
+//				threadSuspended = true;
+//			break;
+//		}
+		//TODO: test this stuff
+		if (stopMode == StopMode.ONESTEP ||
+				(stepStopDepth == searchDepth() &&
+						(stopMode == StopMode.STEPOVER ||
+						(steppingOut && stopMode == StopMode.STEPOUT) ||
+						(steppingIn && stopMode == StopMode.STEPIN))))
 			threadSuspended = true;
+
         try {
         	if (threadSuspended) {
         		// System.out.println("Suspending thread...");
@@ -636,4 +660,11 @@ class NuriSolver extends Thread  {
         }
 	}
 
+	/** Set the searchDepth at which stepping out should cause the solver
+	 * to pause. Use i == 0 to stop at current level; -1 to pause after
+	 * stepping out; 1 to pause after stepping in.
+	 */
+	void setStepStopDepth(int i) {
+		stepStopDepth = (short)(searchDepth() + i);
+	}
 }
