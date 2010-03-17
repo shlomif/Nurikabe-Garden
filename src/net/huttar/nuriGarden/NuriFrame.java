@@ -7,6 +7,8 @@ import java.awt.Container;
 // import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.KeyEvent;
 // import java.awt.Insets;
 //import java.awt.Label;
@@ -32,7 +34,7 @@ import javax.swing.JMenuBar;
  *
  */
 // AWT: 	public class NuriFrame extends Frame {
-public class NuriFrame extends JFrame implements ActionListener {
+public class NuriFrame extends JFrame implements ActionListener, ComponentListener {
 
 	private static final long serialVersionUID = 1L;
 
@@ -111,13 +113,6 @@ public class NuriFrame extends JFrame implements ActionListener {
         statusLabel = new JLabel();
         labelContainer.add(statusLabel);
         
-        // For embedding Processing applet see
-        // http://dev.processing.org/reference/core/javadoc/processing/core/PApplet.html
-        vis = new NuriVisualizer();
-        vis.frame = this;
-        // AWT: add(vis, BorderLayout.CENTER);
-        panel.add(vis);
-        
         // TODO: get frame to properly surround PApplet.
         setSize(700, 500);
         setResizable(true);
@@ -130,7 +125,15 @@ public class NuriFrame extends JFrame implements ActionListener {
 		// initial state, debug mode, visualizer
 		solver = new NuriSolver(board, false, vis);
 		// board.setSolver(solver);
-		vis.setSolver(solver);
+		
+        // For embedding Processing applet see
+        // http://dev.processing.org/reference/core/javadoc/processing/core/PApplet.html
+        vis = new NuriVisualizer(board, solver);
+        vis.frame = this;
+        // AWT: add(vis, BorderLayout.CENTER);
+        panel.add(vis);
+
+		solver.setVisualizer(vis);
 
 		//panel.setBorder(new EmptyBorder(new Insets(20, 20, 20, 20)));
 
@@ -138,13 +141,17 @@ public class NuriFrame extends JFrame implements ActionListener {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLocationRelativeTo(null);
 
+		// Listen for resize events on the frame:
+		this.addComponentListener(this);
+		
         setVisible(true);
         
         // important to call this whenever embedding a PApplet.
         // It ensures that the animation thread is started and
         // that other internal variables are properly set.
         vis.init();
-		// vis.setSizeToBoard(board); // no effect
+		vis.setSizeToBoard(board);
+        vis.redraw();
 	}
 
 	/** Update status display.
@@ -196,4 +203,20 @@ public class NuriFrame extends JFrame implements ActionListener {
 		NuriFrame nf = new NuriFrame();
 		nf.init();
 	}    
+	
+	/** Because we implement ComponentListener, we have to provide all these
+	 * methods, even though we may only care about resize events at the moment.
+	 * Actually these don't seem to be helping... the board still does not get redrawn
+	 * when we hide-and-expose the app; and on initial run, the board is drawn too small. */
+	public void componentHidden(ComponentEvent e) { }
+
+    public void componentMoved(ComponentEvent e) { }
+
+    public void componentResized(ComponentEvent e) {
+    	if (vis != null) vis.redraw();    	
+    }
+
+    public void componentShown(ComponentEvent e) {
+    	if (vis != null) vis.redraw();
+	}
 }

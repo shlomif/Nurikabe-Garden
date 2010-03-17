@@ -667,4 +667,8 @@ class NuriSolver extends Thread  {
 	void setStepStopDepth(int i) {
 		stepStopDepth = (short)(searchDepth() + i);
 	}
+
+	void setVisualizer(NuriVisualizer vis) {
+		visualizer = vis;
+	}
 }

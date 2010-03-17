@@ -1,8 +1,14 @@
 /*
- * TODO: I'm going to need text labels, buttons and stuff to give more info about
+ * TODO: need to redraw the board on a resize, even when in noLoop.
+ *   So we need to detect a resize either here, or in the frame.
+ *   Could detect it in the frame and then call vis.redraw().
+ *   Or try to understand http://dev.processing.org/bugs/show_bug.cgi?id=209
+ * DONE: I'm going to need text labels, buttons and stuff to give more info about
  * what's happening, and more user control. UI is outside the scope of Processing.
  * Surround the Processing applet component with a regular Java GUI frame
- * or whatever. Probably not Swing -- I hear it's bloated. 
+ * or whatever. Using Swing. Some say it's bloated, others say it's not substantially
+ * slower than SWT. It sounds like Swing is more widespread and easier to use.
+ * I'll go with it. I don't expect the UI to be the performance bottleneck. 
  * TODO: during solving, turn on loop; when not solving, turn it off.
  *  (but make sure redraw still occurs).
  * DONE: cache result of isSolved; pass it back and forth via setState; clear it when sthg changes
@@ -60,6 +66,13 @@ class NuriVisualizer extends PApplet {
 	NuriState puz = null;
 	NuriSolver solver = null;
 	
+	
+	public NuriVisualizer(NuriState board, NuriSolver s) {
+		super();
+		puz = board;
+		solver = s;
+	}
+
 	public void setup() {
 		size(400, 400); // default
 		if (puz != null) setSizeToBoard(puz);
@@ -82,6 +95,7 @@ class NuriVisualizer extends PApplet {
 		
 		// use HSB color mode with low-res hue 
 		colorMode(HSB, 30, 100, 100);
+		noLoop(); // draw only on demand, except during solving
 	}
         
 	void setSizeToBoard(NuriState puz) {
