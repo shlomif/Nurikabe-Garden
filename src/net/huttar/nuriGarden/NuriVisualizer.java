@@ -1,4 +1,8 @@
 /*
+ * TODO: features for drafting a puzzle...
+ * - mode where clicking on a cell places an island, e.g. a 1, and clicking again increments it
+ *   - right-clicking decrements it, and when it reaches 0 it's gone
+ * - function to "sprinkle seeds" 
  * TODO: need to redraw the board on a resize, even when in noLoop.
  *   So we need to detect a resize either here, or in the frame.
  *   Could detect it in the frame and then call vis.redraw().
@@ -62,7 +66,8 @@ class NuriVisualizer extends PApplet {
 
 	private final int margin = 10;
 	private final int prefCellSize = smallFontSize;
-
+	private int cellW = prefCellSize, cellH = prefCellSize;
+	
 	NuriFrame frame = null;
 	NuriState puz = null;
 	NuriSolver solver = null;
@@ -92,7 +97,7 @@ class NuriVisualizer extends PApplet {
 		textFont(bigFont);
 		textAlign(CENTER);
 		currFontSize = currFont.size; // docs don't say if this is pixels or points
-		System.out.println("Curr font size: " + currFontSize);
+		// System.out.println("Curr font size: " + currFontSize);
 		
 		// use HSB color mode with low-res hue 
 		colorMode(HSB, 30, 100, 100);
@@ -124,8 +129,8 @@ class NuriVisualizer extends PApplet {
     	//TODO: probably need to add synchronization or sthg to make sure the board object doesn't disappear on us
     	// while we're accessing it.
     	int left = 0, top = 0, margin = 10;
-    	int cellW = (width - margin * 2) / puz.getWidth();
-    	int cellH = (height - margin * 2) / puz.getHeight();
+    	cellW = (width - margin * 2) / puz.getWidth();
+    	cellH = (height - margin * 2) / puz.getHeight();
     	// Make cells square.
     	cellW = Math.min(cellW, cellH);
     	cellH = cellW;
@@ -235,12 +240,31 @@ class NuriVisualizer extends PApplet {
 		}
 	}
 	
-	public void mouseClicked() {
+	public void mousePressed() {
+		// get cell where the click occurred
+		int c = (mouseX - margin) / cellW;
+		int r = (mouseY - margin) / cellH;
+		// System.out.println("Mouse clicked in cell: " + c + ", " + r);
+		toggleCellState(r, c);
 	}
 	
+	private void toggleCellState(int r, int c) {
+		if (solver.isAlive()) {
+			// TODO: beep or flash or something
+		} else {
+			puz.initializeCell(r, c,
+					(mouseButton == LEFT) ? NuriState.TOGGLEFWD : NuriState.TOGGLEBWD);
+			puz.setGuessLevel(r, c, puz.searchDepth);
+			// update regions accordingly
+			// TODO: could optimize the following; it's kind of overkill.
+			puz.prepareStats(false);
+			redraw();
+		}
+	}
+
 	//TODO: move these controls out of visualizer
 	public void keyPressed() {
-		System.out.println("Got key: " + key);
+		// System.out.println("Visualizer got key: " + key);
 
 		switch(key) {
 		case '1':

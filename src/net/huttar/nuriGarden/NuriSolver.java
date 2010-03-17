@@ -26,6 +26,8 @@ class NuriSolver extends Thread  {
 
 	enum StopMode { ONESTEP, STEPIN, STEPOVER, STEPOUT, CONTINUE, RESTART, EXIT };
 	
+	// Indicates when the solver should stop (suspend thread).
+	// If solver is already suspended, this takes effect next time it is running.
 	volatile StopMode stopMode = StopMode.CONTINUE; //B (or A)
 
 	/** Tells thread when to pause. */
@@ -246,7 +248,9 @@ class NuriSolver extends Thread  {
 	
 	/** Infer that the given cell holds the given value.
 	 * Call set() and issue a debugging message. */
-	protected void infer(NuriState board, Coords cell, char value, String rule) throws ContradictionException {
+	protected void infer(NuriState board, Coords cell, char value, String rule)
+			throws ContradictionException
+	{
 		if (board.alreadyIs(cell, value)) return; // Already was that value.
 		totalInferences++;
 		lastRule = rule;
@@ -640,6 +644,9 @@ class NuriSolver extends Thread  {
 //			break;
 //		}
 		//TODO: test this stuff
+		
+		// checkCellToSet(); disabled for now
+		
 		if (stopMode == StopMode.ONESTEP ||
 				(stepStopDepth == searchDepth() &&
 						(stopMode == StopMode.STEPOVER ||
@@ -671,4 +678,40 @@ class NuriSolver extends Thread  {
 	void setVisualizer(NuriVisualizer vis) {
 		visualizer = vis;
 	}
+
+	//// The following was for trying to change a cell state by user input while the solver
+	//// was running. Dumb idea... way too complicated for now. May resurrect later if important.
+//	/** When cellToSet is non-null, solver must stop when convenient and set the cell
+//	 * according to valueToSet; then clear cellToSet.
+//	 * */
+//	Coords cellToSet = null;
+//	char valueToSet = NuriState.TOGGLE;
+//	
+//	/** Let the solver know that the user changed value of given cell.
+//	 * Does not take effect until solver is at a point where it is ready to handle
+//	 * this information.
+//	 * value can be BLACK, WHITE, UNKNOWN, or TOGGLE.
+//	 * Effect of 'TOGGLE' may depend on user settings.
+//	 * Currently just cycles black/white/unknown. */
+//	public void userSetCell(int r, int c, char value) {
+//		threadSuspended = true;
+//		cellToSet = new Coords(r, c);
+//		valueToSet = value;
+//	}
+//
+//	private void checkCellToSet() {
+//		if (cellToSet != null) {
+//			lastRule = "User input";
+//			if (lastChangedCell == null)
+//				lastChangedCell = new Coords(0, 0);
+//			lastChangedCell.copy(cellToSet);
+//			debugMsg(searchDepth(), "Rule " + lastRule + ": " + cellToSet + " = " + valueToSet);
+//			//TODO: do we really want to change latestBoard? maybe topBoard?
+//			latestBoard.set(cellToSet, valueToSet);
+//			latestBoard.setGuessLevel(cellToSet, latestBoard.searchDepth);
+//			// ##**TODO: what do we need to do about solve state?
+//			// It could be erroneous now.
+//			cellToSet = null;
+//		}
+//	}
 }

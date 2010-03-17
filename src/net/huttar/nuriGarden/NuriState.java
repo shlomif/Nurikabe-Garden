@@ -58,12 +58,14 @@ import net.huttar.nuriGarden.NuriSolver;
 class NuriState implements Iterable<Coords>, Cloneable  { 
 	/** Character for a filled-in cell. */
 	static final char BLACK = '#';
-
 	/** Character for a cell known to be white. */
 	static final char WHITE = '.';
-
 	/** Character for a cell of unknown status. */
 	static final char UNKNOWN = '?';
+
+	/** Never used as a cell state; instead used for operation to toggle the
+	 * existing state. */
+	static final char TOGGLEFWD = '/', TOGGLEBWD = '\\';
 
 	/** Allowed number characters: 1 to 35, base 36 */
 	static final String NUMBERS = "123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -352,7 +354,7 @@ class NuriState implements Iterable<Coords>, Cloneable  {
 		guessLevel[cell.getRow()][cell.getColumn()] = gl;
 	}
 
-	private void setGuessLevel(int c, int r, short gl) {
+	void setGuessLevel(int c, int r, short gl) {
 		guessLevel[c][r] = gl;
 	}
 	
@@ -460,6 +462,22 @@ class NuriState implements Iterable<Coords>, Cloneable  {
 	 * @param value: new value
 	 */
 	void initializeCell(int r, int c, char value) {
+		if (value == TOGGLEFWD) {
+			//TODO: later, make behavior of TOGGLE configurable.
+			switch(grid[r][c]) {
+			case BLACK: value = WHITE; break;
+			case WHITE: value = UNKNOWN; break;
+			case UNKNOWN: value = BLACK; break;
+			default: assert(true); // unexpected value
+			}
+		} else if (value == TOGGLEBWD) {
+			switch(grid[r][c]) {
+			case BLACK: value = UNKNOWN; break;
+			case WHITE: value = BLACK; break;
+			case UNKNOWN: value = WHITE; break;
+			default: assert(true); // unexpected value
+			}
+		}
 		grid[r][c] = value;
 	}
 

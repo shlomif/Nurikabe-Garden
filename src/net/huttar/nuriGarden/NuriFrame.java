@@ -1,6 +1,10 @@
 package net.huttar.nuriGarden;
 
 /**
+ * FIXME: visualizer doesn't show guesses any more! or at least not in color...
+ * TODO: Need a way to stop solver, leaving its sure results on the board but
+ * allowing user to set white/black; then restart solver taking into account those
+ * new settings.
  * TODO: allow user to click on rule shown in status label, to get help
  * frame (attached on right of button panel? or separate window?) that shows
  * html describing the rule.
@@ -122,8 +126,10 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
         // pack();
 
         // TODO: parameterize; or get from a File Open dlg
-		parser = new NuriParser("samples/huttar_ts.txt");
-		board = parser.loadFile(9); // Janko 25: two-digit
+		// parser = new NuriParser("samples/huttar_ts.txt");
+		// board = parser.loadFile(9);
+		parser = new NuriParser("samples/janko_ts.txt");
+		board = parser.loadFile(25); // Janko 25: two-digit
 		
 		// initial state, debug mode, visualizer
 		solver = new NuriSolver(board, false, vis);
