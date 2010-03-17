@@ -48,9 +48,9 @@ class NuriSolver extends Thread  {
 	volatile Coords lastChangedCell = null; //B
 	
 	/** State of board we're solving. */
-	private NuriState topBoard = null; //C
+	private NuriBoard topBoard = null; //C
 
-	volatile NuriState latestBoard = null; //B
+	volatile NuriBoard latestBoard = null; //B
 	
 	private NuriVisualizer visualizer = null; //B (or A)
 
@@ -84,7 +84,7 @@ class NuriSolver extends Thread  {
 
 
 	/** Read specified puzzle from the given file. */
-	NuriSolver(NuriState board,
+	NuriSolver(NuriBoard board,
 			boolean debugMode, NuriVisualizer vis) {
 		NuriSolver.debugMode = debugMode;
 		this.visualizer = vis;
@@ -105,7 +105,7 @@ class NuriSolver extends Thread  {
 
 		NuriParser parser = new NuriParser(args[fileArg].indexOf('.') > -1 ?
 				args[fileArg] : args[fileArg] + ".puz");
-		NuriState board = parser.loadFile(182);
+		NuriBoard board = parser.loadFile(182);
 
 		NuriSolver solver = new NuriSolver(board, true, null);
 		// board.setSolver(solver);
@@ -179,7 +179,7 @@ class NuriSolver extends Thread  {
 	}
 
 	/** Output progress metrics to debugging console or visualizer. */
-	void showProgress(NuriState board) {
+	void showProgress(NuriBoard board) {
 		// if (visualizer != null) visualizer.draw();
 
 		/** From deep in a search, find innermost puzzle whose state was sure. */
@@ -187,7 +187,7 @@ class NuriSolver extends Thread  {
 		 * an instance variable of nuriSolver and make sure to clear it
 		 * if we return from a sure board.
 		 */
-		NuriState lastSureBoard;
+		NuriBoard lastSureBoard;
 		for (lastSureBoard = board; !lastSureBoard.isSure;
 			lastSureBoard = lastSureBoard.predecessor)
 			;
@@ -199,7 +199,7 @@ class NuriSolver extends Thread  {
 	}
 
 	/** Solve the puzzle and return true if successful. */
-	boolean solve(NuriState board) throws ContradictionException {
+	boolean solve(NuriBoard board) throws ContradictionException {
 		board.changed = true;
 		board.validityKnown = false;
 		
@@ -240,7 +240,7 @@ class NuriSolver extends Thread  {
 			// How do we find out whether multiple processors are available?
 			if (!trySearch(board, unknownCell, color, false))
 				// Try out other hypothesis.
-				trySearch(board, unknownCell, NuriState.isWhite(color) ? NuriState.BLACK : NuriState.WHITE, true);
+				trySearch(board, unknownCell, NuriBoard.isWhite(color) ? NuriBoard.BLACK : NuriBoard.WHITE, true);
 		}
 
 		return board.isSolved();
@@ -248,7 +248,7 @@ class NuriSolver extends Thread  {
 	
 	/** Infer that the given cell holds the given value.
 	 * Call set() and issue a debugging message. */
-	protected void infer(NuriState board, Coords cell, char value, String rule)
+	protected void infer(NuriBoard board, Coords cell, char value, String rule)
 			throws ContradictionException
 	{
 		if (board.alreadyIs(cell, value)) return; // Already was that value.
@@ -267,12 +267,12 @@ class NuriSolver extends Thread  {
 	
 	/** Put the given value in the given cell and recursively try to solve the puzzle.
 	 * Return true if successful. */ 
-	private boolean trySearch(NuriState board, Coords cell, char value, boolean isSure) {
+	private boolean trySearch(NuriBoard board, Coords cell, char value, boolean isSure) {
 		totalHypotheses++;
 		showProgress(board);
 		
 		// Save state
-		NuriState trialBoard = (NuriState)board.clone();
+		NuriBoard trialBoard = (NuriBoard)board.clone();
 		latestBoard = trialBoard;
 		trialBoard.isSure = (isSure ? board.isSure : false);
 		trialBoard.predecessor = board;
@@ -307,7 +307,7 @@ class NuriSolver extends Thread  {
 	}
 
 	/** Apply the inference rules that don't require any trial-and-error. */
-	private void applyProductionRules(NuriState board) throws ContradictionException {
+	private void applyProductionRules(NuriBoard board) throws ContradictionException {
 		// Is there a way to put references to these methods into an iterator and
 		// loop through them?
 		rule0(board);
@@ -333,18 +333,18 @@ class NuriSolver extends Thread  {
 	 * 
 	 * @throws ContradictionException
 	 */
-	private void rule0(NuriState board) throws ContradictionException {
+	private void rule0(NuriBoard board) throws ContradictionException {
 		if (ranRule0) return; else ranRule0 = true;
 		
 		outer:
 		for (Coords cell : board) {
-			if (NuriState.isANumber(board.get(cell))) continue;
+			if (NuriBoard.isANumber(board.get(cell))) continue;
 			for (UCRegion region : board.whiteRegions) {
 				if (cell.manhattanDist(region.getNumberedCell()) + 1 <= region.getLimit())
 					continue outer;
 			}
 			/** No numbered cell is close enough, so this cell must be black. */
-			infer(board, cell, NuriState.BLACK, "0");
+			infer(board, cell, NuriBoard.BLACK, "0");
 		}
 	}
 
@@ -354,17 +354,17 @@ class NuriSolver extends Thread  {
 	 * 
 	 * @throws ContradictionException
 	 */
-	private void rule1(NuriState board) throws ContradictionException {
+	private void rule1(NuriBoard board) throws ContradictionException {
 		for (UCRegion region : board.whiteRegions) {
 			if (!region.isHungry()) {
 				// Make sure all its neighbors are black
 				for (Coords cell : region.getOnlyNeighbors()) {
 					switch (board.get(cell)) {
-					case NuriState.UNKNOWN:
-						// set cell to NuriState.BLACK by rule 1
-						infer(board, cell, NuriState.BLACK, "1");
+					case NuriBoard.UNKNOWN:
+						// set cell to NuriBoard.BLACK by rule 1
+						infer(board, cell, NuriBoard.BLACK, "1");
 						break;
-					case NuriState.BLACK:
+					case NuriBoard.BLACK:
 						break;
 					default: // white or number
 						throw new ContradictionException(
@@ -382,16 +382,16 @@ class NuriSolver extends Thread  {
 	 * 
 	 * @throws ContradictionException
 	 */
-	private void rule2(NuriState board) throws ContradictionException {
+	private void rule2(NuriBoard board) throws ContradictionException {
 		for (Coords cell : board) {
-			if (board.get(cell) != NuriState.UNKNOWN) continue;
+			if (board.get(cell) != NuriBoard.UNKNOWN) continue;
 			UCRegion reg1 = null, reg2 = null;
 			// TODO Enhancement: compare each neighboring numbered white region
 			// to every neighboring unnumbered white region, because some unnumbered regions
 			// could be too big to unify with 
 			// 
 			for (Coords neighbor : board.neighbors(cell)) {
-				if (NuriState.isWhite(board.get(neighbor))) {
+				if (NuriBoard.isWhite(board.get(neighbor))) {
 					// Haven't yet found a neighboring region with a number? 
 					if (reg1 == null) {
 						reg1 = board.containingRegion(neighbor);
@@ -411,7 +411,7 @@ class NuriSolver extends Thread  {
 						if (reg2.getLimit() == 0) reg2 = null;
 						else {
 							// ok, we have two. Then the cell is black.
-							infer(board, cell, NuriState.BLACK, "2");
+							infer(board, cell, NuriBoard.BLACK, "2");
 							break; // out of inner for loop
 						}
 					}
@@ -428,7 +428,7 @@ class NuriSolver extends Thread  {
 	 * 
 	 * @throws ContradictionException
 	 */
-	private void rule3(NuriState board) throws ContradictionException {
+	private void rule3(NuriBoard board) throws ContradictionException {
 		try {
 			for (UCRegion region : board.whiteRegions) rule3a(board, region);
 			if (board.isSolved()) return;
@@ -454,10 +454,10 @@ class NuriSolver extends Thread  {
 	 * 
 	 * @throws ContradictionException
 	 */
-	private void rule3a(NuriState board, UCRegion region) throws ContradictionException {
+	private void rule3a(NuriBoard board, UCRegion region) throws ContradictionException {
 		if (!region.isHungry()) return;
 		// Find UNKNOWN neighbors.
-		Region neighbors = region.getNeighbors("" + NuriState.UNKNOWN);
+		Region neighbors = region.getNeighbors("" + NuriBoard.UNKNOWN);
 		switch(neighbors.size()) {
 		case 0:
 			throw new ContradictionException("Hungry UCRegion " + region + " has nowhere to grow.");
@@ -481,19 +481,19 @@ class NuriSolver extends Thread  {
 			// OK, we qualify. Find out which other cell is not in the hungry region.
 			Coords cellA = new Coords(r0, c1), cellB = new Coords(r1, c0);
 			Coords targetCell = region.contains(cellA) ? cellB : cellA;
-			char targetColor = region.getContentType() == NuriState.WHITE ? NuriState.BLACK : NuriState.WHITE;
+			char targetColor = region.getContentType() == NuriBoard.WHITE ? NuriBoard.BLACK : NuriBoard.WHITE;
 			boolean nearWhite = false;
 			// ... or if region is white and target cell is next to another white cell.
-			if (hunger != 1 && region.getContentType() == NuriState.WHITE) {
+			if (hunger != 1 && region.getContentType() == NuriBoard.WHITE) {
 				// TODO:
 //				Coords cellC = ...;
 //				Coords cellD = ...;
-//				if (NuriState.isWhite(board.get(cellC)) || NuriState.isWhite(board.get(cellD))) nearWhite = true;
+//				if (NuriBoard.isWhite(board.get(cellC)) || NuriBoard.isWhite(board.get(cellD))) nearWhite = true;
 			}
 			if (hunger == 1 || nearWhite) {
-				if (board.get(targetCell) == NuriState.UNKNOWN)
+				if (board.get(targetCell) == NuriBoard.UNKNOWN)
 					infer(board, targetCell, targetColor, "3a");
-				else if (NuriState.isWhite(board.get(targetCell)) != NuriState.isWhite(targetColor))
+				else if (NuriBoard.isWhite(board.get(targetCell)) != NuriBoard.isWhite(targetColor))
 						throw new ContradictionException("Diagonal cell " + targetCell + " should be '" +
 								targetColor + "' but is '" + board.get(targetCell) + "'.");
 			}
@@ -505,7 +505,7 @@ class NuriSolver extends Thread  {
 	}
 
 	/** Production rule 4: If we have 3 black cells in an L-shape, the 4th cell must be white. */
-	private void rule4(NuriState board) throws ContradictionException {
+	private void rule4(NuriBoard board) throws ContradictionException {
 		for (Coords cell : board) {
 			if (cell.getRow() < board.getHeight() - 1 &&
 					cell.getColumn() < board.getWidth() - 1) {
@@ -514,14 +514,14 @@ class NuriSolver extends Thread  {
 				Coords cell11 = new Coords(cell.getRow()+1, cell.getColumn()+1);
 				Coords whiteCell = null;
 				int blackCells = 0;
-				if (board.get(cell) == NuriState.BLACK) blackCells++; else whiteCell = cell;
-				if (board.get(cell01) == NuriState.BLACK) blackCells++; else whiteCell = cell01;
-				if (board.get(cell10) == NuriState.BLACK) blackCells++; else whiteCell = cell10;
-				if (board.get(cell11) == NuriState.BLACK) blackCells++; else whiteCell = cell11;
+				if (board.get(cell) == NuriBoard.BLACK) blackCells++; else whiteCell = cell;
+				if (board.get(cell01) == NuriBoard.BLACK) blackCells++; else whiteCell = cell01;
+				if (board.get(cell10) == NuriBoard.BLACK) blackCells++; else whiteCell = cell10;
+				if (board.get(cell11) == NuriBoard.BLACK) blackCells++; else whiteCell = cell11;
 				if (blackCells == 4)
 					throw new ContradictionException("2x2 black cells at " + cell);
-				else if (blackCells == 3 && board.get(whiteCell) == NuriState.UNKNOWN) {
-					infer(board, whiteCell, NuriState.WHITE, "4");
+				else if (blackCells == 3 && board.get(whiteCell) == NuriBoard.UNKNOWN) {
+					infer(board, whiteCell, NuriBoard.WHITE, "4");
 					if (board.isSolved()) break;
 				}
 			}
@@ -534,21 +534,21 @@ class NuriSolver extends Thread  {
 	 * that color. (A white cell with number '1' in it is surrounded by black but is never UNKNOWN, so this rule works.) 
 	 * This rule covers a subset of rule 5a but is quicker to compute.
 	 */
-	private void rule5(NuriState board) throws ContradictionException {
+	private void rule5(NuriBoard board) throws ContradictionException {
 		outer:
 		for (Coords cell : board) {
 			if (board.get(cell) != '1') {
 				List<Coords> neighbors = board.neighbors(cell);
 				Iterator<Coords> iter = neighbors.iterator();
 				Coords firstNeighbor = (Coords)iter.next();
-				char firstValue = NuriState.unifyWhite(board.get(firstNeighbor));
-				if (firstValue == NuriState.UNKNOWN) continue outer;
+				char firstValue = NuriBoard.unifyWhite(board.get(firstNeighbor));
+				if (firstValue == NuriBoard.UNKNOWN) continue outer;
 				while (iter.hasNext()) {
-					if (NuriState.unifyWhite(board.get((Coords)iter.next())) != firstValue)
+					if (NuriBoard.unifyWhite(board.get((Coords)iter.next())) != firstValue)
 						continue outer;
 				}
 				/* Neighbors are either all white or all black. Conform. */
-				if (board.get(cell) != NuriState.UNKNOWN && NuriState.isWhite(board.get(cell)) != NuriState.isWhite(firstValue))
+				if (board.get(cell) != NuriBoard.UNKNOWN && NuriBoard.isWhite(board.get(cell)) != NuriBoard.isWhite(firstValue))
 					throw new ContradictionException(cell + " surrounded by opposite color");
 				infer(board, cell, firstValue, "5");
 			}
@@ -561,35 +561,35 @@ class NuriSolver extends Thread  {
 	 * that has no path to a black cell must be white.   
 	 * This rule overlaps somewhat with rule 6 but is easier to implement.
 	 */
-	private void rule5a(NuriState board) throws ContradictionException {
+	private void rule5a(NuriBoard board) throws ContradictionException {
 		// outer:
 		for (Coords cell : board) {
-			if (board.get(cell) == NuriState.UNKNOWN ||
-					(NuriState.isWhite(board.get(cell)) && board.get(cell) != '1')) {
+			if (board.get(cell) == NuriBoard.UNKNOWN ||
+					(NuriBoard.isWhite(board.get(cell)) && board.get(cell) != '1')) {
 				// Do we have a path to a number?
-				Coords target = board.areaFind(cell, "" + NuriState.WHITE + NuriState.UNKNOWN,
-						NuriState.NUMBERS);
+				Coords target = board.areaFind(cell, "" + NuriBoard.WHITE + NuriBoard.UNKNOWN,
+						NuriBoard.NUMBERS);
 				if (target == null) {
 					// No path to number so must be black.
-					if (board.alreadyIs(cell, NuriState.WHITE))
+					if (board.alreadyIs(cell, NuriBoard.WHITE))
 						throw new ContradictionException("White cell " + cell + " has no path to number.");
 					else {
-						infer(board, cell, NuriState.BLACK, "5a1");
+						infer(board, cell, NuriBoard.BLACK, "5a1");
 						// short-circuit on change
 						return;
 					}
 				}
 			}
-			if ((board.get(cell) == NuriState.UNKNOWN || board.get(cell) == NuriState.BLACK) &&
+			if ((board.get(cell) == NuriBoard.UNKNOWN || board.get(cell) == NuriBoard.BLACK) &&
 					!board.blackRegions.isEmpty()) {
 				// Do we have a path to a number?
-				Coords target = board.areaFind(cell, "" + NuriState.UNKNOWN, "" + NuriState.BLACK);
+				Coords target = board.areaFind(cell, "" + NuriBoard.UNKNOWN, "" + NuriBoard.BLACK);
 				if (target == null) {
 					// No path to black so must be white.
-					if (board.get(cell) == NuriState.BLACK)
+					if (board.get(cell) == NuriBoard.BLACK)
 						throw new ContradictionException("Black cell " + cell + " has no path to black.");
 					else {
-						infer(board, cell, NuriState.WHITE, "5a2");
+						infer(board, cell, NuriBoard.WHITE, "5a2");
 						// short-circuit on change
 						return;
 					}
@@ -606,11 +606,11 @@ class NuriSolver extends Thread  {
 	 * must be black.
 	 * TODO: need a method for tracing a path from A to B of length n. 
 	 */
-	private void rule6(NuriState board) throws ContradictionException {
+	private void rule6(NuriBoard board) throws ContradictionException {
 		/*
 		// First check all UNKNOWN cells.
 		for (Coords cell : this) {
-			if (board.get(cell) == NuriState.UNKNOWN) {
+			if (board.get(cell) == NuriBoard.UNKNOWN) {
 				// TODO				
 			}
 		}
@@ -685,7 +685,7 @@ class NuriSolver extends Thread  {
 //	 * according to valueToSet; then clear cellToSet.
 //	 * */
 //	Coords cellToSet = null;
-//	char valueToSet = NuriState.TOGGLE;
+//	char valueToSet = NuriBoard.TOGGLE;
 //	
 //	/** Let the solver know that the user changed value of given cell.
 //	 * Does not take effect until solver is at a point where it is ready to handle

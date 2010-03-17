@@ -15,7 +15,7 @@ class UCRegion extends Region implements Cloneable {
 	 */
 	private static final long serialVersionUID = 4152740641552650062L;
 
-	static String WhiteAllowable = "123456789" + NuriState.WHITE;
+	static String WhiteAllowable = "123456789" + NuriBoard.WHITE;
 
 	/** Content of cells in this ucRegion: WHITE or BLACK. */
 	private char contentType;
@@ -52,10 +52,10 @@ class UCRegion extends Region implements Cloneable {
 	/** Create an empty UCRegion that can only hold cells of
 	 * the given content type.
 	 */
-	UCRegion(NuriState puzzle, char type) {
+	UCRegion(NuriBoard puzzle, char type) {
 		super(puzzle);
 		contentType = type;
-		if (type == NuriState.BLACK) {
+		if (type == NuriBoard.BLACK) {
 			limit = puzzle.getExpBlackCount();
 		} else {
 			limit = 0;
@@ -69,15 +69,15 @@ class UCRegion extends Region implements Cloneable {
 	/** Create a UCRegion in puzzle consisting of cell. The region's contentType
 	 * is determined by the contents of cell.
 	 */ 
-	UCRegion(NuriState puzzle, Coords cell) {
+	UCRegion(NuriBoard puzzle, Coords cell) {
 		super(puzzle);
 		char content = puzzle.get(cell);
-		contentType = NuriState.isANumber(content) ? NuriState.WHITE : content;
+		contentType = NuriBoard.isANumber(content) ? NuriBoard.WHITE : content;
 		
-		if (contentType == NuriState.BLACK) {
+		if (contentType == NuriBoard.BLACK) {
 			limit = puzzle.getExpBlackCount();
-		} else if (NuriState.isANumber(content)) {
-			limit = NuriState.numberValue(content);
+		} else if (NuriBoard.isANumber(content)) {
+			limit = NuriBoard.numberValue(content);
 			numberedCell = cell;
 		}
 		add(cell);
@@ -89,7 +89,7 @@ class UCRegion extends Region implements Cloneable {
 		char content = puzzle.get(cell);
 		if (!isHungry())
 			throw new ContradictionException("Tried to add " + cell + " to full region.");
-		if (NuriState.isANumber(content)) {
+		if (NuriBoard.isANumber(content)) {
 			if (numberedCell != null)
 				throw new ContradictionException("Tried to add numbered cell " + cell +
 				" to a numbered region" + this);
@@ -118,7 +118,7 @@ class UCRegion extends Region implements Cloneable {
 		if (newRegion.contentType != this.contentType)
 			throw new ContradictionException("Tried to add UCRegion of type " + newRegion.contentType
 					+ " to UCRegion of type" + this.contentType + ".");
-		if (contentType == NuriState.WHITE && this.limit > 0 && newRegion.limit > 0)
+		if (contentType == NuriBoard.WHITE && this.limit > 0 && newRegion.limit > 0)
 			throw new ContradictionException("Tried to combine two numbered UCRegions " + this + " and " + newRegion);
 		if (this.numberedCell == null)
 			this.numberedCell = newRegion.numberedCell;
@@ -146,7 +146,7 @@ class UCRegion extends Region implements Cloneable {
 	}
 	
 	/** Set puzzle context (after cloning). */
-	void setState(NuriState puzzle) {
+	void setState(NuriBoard puzzle) {
 		this.puzzle = puzzle;
 	}
 	

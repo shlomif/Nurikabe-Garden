@@ -1,5 +1,5 @@
 package net.huttar.nuriGarden;
-/** DONE: keep a static member pointing to the "current" NuriState board (or its grid) */
+/** DONE: keep a static member pointing to the "current" NuriBoard board (or its grid) */
 /** TODO: use multiple threads (depending on # of processors available) to
  * investigate multiple lines of backtracking simultaneously.
  */
@@ -28,7 +28,7 @@ package net.huttar.nuriGarden;
  * 2) More meaningful metrics. Report how many cells are known, and
  * how many just guessed. Use trySearch()'s isSure parameter...
  * maybe count as known all non-UNKNOWN cells in puzzle at hypoth-level i,
- * where every level from 0 to i is a isSure. Maybe each NuriState instance
+ * where every level from 0 to i is a isSure. Maybe each NuriBoard instance
  * can have an "isSure" field. I have begun implementing this.
  */
 /** TODO: would be nice to allow comments in *.puz files. Requires changing
@@ -52,10 +52,10 @@ import java.util.*;
 
 import net.huttar.nuriGarden.NuriSolver;
 
-/** Program to solve NuriState puzzles. 
- * A "NuriState" instance represents a board state.
+/** Program to solve NuriBoard puzzles. 
+ * A "NuriBoard" instance represents a board state.
  * Used to be one class with NuriSolver, named Nurikabe, but I split it up. */
-class NuriState implements Iterable<Coords>, Cloneable  { 
+class NuriBoard implements Iterable<Coords>, Cloneable  { 
 	/** Character for a filled-in cell. */
 	static final char BLACK = '#';
 	/** Character for a cell known to be white. */
@@ -83,9 +83,9 @@ class NuriState implements Iterable<Coords>, Cloneable  {
 	 * i is index of puzzle in the file (1-based).
 	 */
 	/* Obsolete.
-	static NuriState init(String filename, int i, NuriSolver solver) {
-		NuriState.debug = debug; 
-		NuriState puzzle = new NuriState(filename, i);
+	static NuriBoard init(String filename, int i, NuriSolver solver) {
+		NuriBoard.debug = debug; 
+		NuriBoard puzzle = new NuriBoard(filename, i);
 		puzzle.solver = solver;
 		// debug = true;
 		// System.out.println(puzzle);
@@ -124,13 +124,13 @@ class NuriState implements Iterable<Coords>, Cloneable  {
 	private boolean validity = false;
 
 	/** The puzzle that this puzzle is a hypothesis branch from. */
-	NuriState predecessor = null;
+	NuriBoard predecessor = null;
 	
-	NuriState() {
+	NuriBoard() {
 	}
 
 	/** Create object and initialize to given dimensions. */
-	public NuriState(int height, int width) {
+	public NuriBoard(int height, int width) {
 		newGrid(height, width);
 		for (int i = 0; i < getHeight(); i++)
 			for (int j = 0; j < getWidth(); j++)
@@ -189,8 +189,8 @@ class NuriState implements Iterable<Coords>, Cloneable  {
 
 	/** Create a new board with only the numbers from this board,
 	 * and the rest unknown. */
-	public NuriState resetCopy() {
-		NuriState newBoard = new NuriState();
+	public NuriBoard resetCopy() {
+		NuriBoard newBoard = new NuriBoard();
 		newBoard.newGrid(getHeight(), getWidth());
 		for (Coords cell : this) {
 			if (isANumber(get(cell)))
@@ -375,25 +375,25 @@ class NuriState implements Iterable<Coords>, Cloneable  {
 	 * about the values of cells.
 	 */
 	Object[] pickUnknownCell() {
-		Character WHITEchar = new Character(NuriState.WHITE); 
+		Character WHITEchar = new Character(NuriBoard.WHITE); 
 		// First preference: find a 1-hungry region with just two
 		// spots to grow into.
 		UCRegion region1 = null;
 		for (UCRegion region : whiteRegions) {
 			if (region.getHunger() == 1) {
 				region1 = region;
-				Region neighbors = region.getNeighbors("" + NuriState.UNKNOWN);
+				Region neighbors = region.getNeighbors("" + NuriBoard.UNKNOWN);
 				if (neighbors.size() == 2) return new Object[]{neighbors.iterator().next(), WHITEchar};
 			}
 		}
 		// If none of the 1-hungry regions has exactly two places to grow
 		// into, just pick any of the 1-hungry regions.
 		if (region1 != null)
-			return new Object[]{region1.getNeighbors("" + NuriState.UNKNOWN).iterator().next(), WHITEchar};
+			return new Object[]{region1.getNeighbors("" + NuriBoard.UNKNOWN).iterator().next(), WHITEchar};
 		
 		// last resort: return any unknown cell.
 		for (Coords cell : this) {
-			if (get(cell) == NuriState.UNKNOWN) return new Object[]{cell, WHITEchar};
+			if (get(cell) == NuriBoard.UNKNOWN) return new Object[]{cell, WHITEchar};
 		}
 		// should never happen:
 		assert(false) : "Puzzle unsolved but no unknown cells!";
@@ -424,7 +424,7 @@ class NuriState implements Iterable<Coords>, Cloneable  {
 				throw new ContradictionException("Overfull region " + region);
 			int numbers = 0;
 			for (Coords cell : region) {
-				if (NuriState.isANumber(get(cell))) {
+				if (NuriBoard.isANumber(get(cell))) {
 					numbers++;
 			if (numbers > 1)
 						throw new ContradictionException("Region " + region + " contains at least 2 numbers; second is " + get(cell));
@@ -488,12 +488,12 @@ class NuriState implements Iterable<Coords>, Cloneable  {
 	 * Grid and regions are copied by their contents.
 	 */
 	protected Object clone() {
-		NuriState newPuzzle = null;
+		NuriBoard newPuzzle = null;
 		try {
-			newPuzzle = (NuriState)super.clone();
+			newPuzzle = (NuriBoard)super.clone();
 		}
 		catch (CloneNotSupportedException e) {
-			System.err.println("NuriState can't clone");
+			System.err.println("NuriBoard can't clone");
 			return null;
 		}
 		newPuzzle.setState(copyGrid(), copyRegions(blackRegions, newPuzzle),
@@ -504,7 +504,7 @@ class NuriState implements Iterable<Coords>, Cloneable  {
 	/** Return mostly-deep copy of a regions List, with newPuzzle context.
 	 * Coords are merely copied by reference.
 	 */
-	private ArrayList<UCRegion> copyRegions(ArrayList<UCRegion> regions, NuriState newPuzzle) {
+	private ArrayList<UCRegion> copyRegions(ArrayList<UCRegion> regions, NuriBoard newPuzzle) {
 		ArrayList<UCRegion> newRegions = new ArrayList<UCRegion>(regions.size());
 		for (UCRegion region : regions) {
 			UCRegion newRegion = (UCRegion)region.clone();

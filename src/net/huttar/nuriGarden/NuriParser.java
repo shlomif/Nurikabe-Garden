@@ -27,8 +27,8 @@ class NuriParser {
 		filename = fn;
 	}
 
-	NuriState loadFile(int i) {
-		NuriState puz = new NuriState();
+	NuriBoard loadFile(int i) {
+		NuriBoard puz = new NuriBoard();
 		if (filename.endsWith(".puz"))
 			loadPuz(puz, filename);
 		else
@@ -37,7 +37,7 @@ class NuriParser {
 		return puz;
 	}
 
-	void loadPuz(NuriState puz, String filename) {
+	void loadPuz(NuriBoard puz, String filename) {
 		try {
 			Scanner in = new Scanner(new FileInputStream(filename));
 			ArrayList<String> lines = new ArrayList<String>();
@@ -53,7 +53,7 @@ class NuriParser {
 					char symbol = lines.get(r).charAt(c);
 					// grid[r][c] = (symbol == WHITE) ? UNKNOWN : symbol;
 					puz.initializeCell(r, c,
-							(symbol == NuriState.WHITE || symbol == '-') ? NuriState.UNKNOWN : symbol);
+							(symbol == NuriBoard.WHITE || symbol == '-') ? NuriBoard.UNKNOWN : symbol);
 				}
 			}
 			puz.prepareStats(false);
@@ -70,7 +70,7 @@ class NuriParser {
 		 */
 		
 		/** Load i-th puzzle from filename (1-based indexing). */ 
-		void loadTxt(NuriState puz, String filename, int i) {
+		void loadTxt(NuriBoard puz, String filename, int i) {
 			try {
 				Scanner in = new Scanner(new FileInputStream(filename));
 				// ArrayList<String> lines = new ArrayList<String>();
@@ -145,9 +145,9 @@ class NuriParser {
 					for (int c = 0; c < columns; c++) {
 						char ch = puzzle.charAt(r * columns + c);
 						if (ch == '-' || ch == '?') {
-							puz.initializeCell(r, c, NuriState.UNKNOWN);
-						} else if (ch == NuriState.WHITE || ch == NuriState.BLACK ||
-								NuriState.isANumber(ch)) {
+							puz.initializeCell(r, c, NuriBoard.UNKNOWN);
+						} else if (ch == NuriBoard.WHITE || ch == NuriBoard.BLACK ||
+								NuriBoard.isANumber(ch)) {
 							puz.initializeCell(r, c, ch);
 						} else {
 							throw new IOException("Unrecognized character " + ch + " in puzzle " + id);

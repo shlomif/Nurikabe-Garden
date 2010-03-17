@@ -1,24 +1,24 @@
 package net.huttar.nuriGarden;
 import java.util.*;
 
-/** A set of locations in a NuriState puzzle. */
+/** A set of locations in a NuriBoard puzzle. */
 class Region extends HashSet<Coords> {
 
 	/** Eclipse says this class should have a serialVersionUID, so here it is. */
 	private static final long serialVersionUID = -6500576669930239666L;
 
 	/** The puzzle in which this Region belongs. */
-	protected NuriState puzzle;
+	protected NuriBoard puzzle;
 
 	/** Create an empty Region. */
-	Region(NuriState puzzle) {
+	Region(NuriBoard puzzle) {
 		this.puzzle = puzzle;
 	}
 
 	/**
 	 * Create a Region in puzzle containing cell.
 	 */
-	Region(NuriState puzzle, Coords cell) {
+	Region(NuriBoard puzzle, Coords cell) {
 		this.puzzle = puzzle;
 		add(cell);
 	}
@@ -27,7 +27,7 @@ class Region extends HashSet<Coords> {
 	 * Create a Region in puzzle containing cell and all contiguous cells with
 	 * labels in allowable.
 	 */
-	Region(NuriState puzzle, Coords cell, String allowable) {
+	Region(NuriBoard puzzle, Coords cell, String allowable) {
 		this.puzzle = puzzle;
 		add(cell);
 		find(allowable);

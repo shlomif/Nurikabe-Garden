@@ -12,7 +12,7 @@ package net.huttar.nuriGarden;
  * for processing hyperlinks.
  * Can use JTextPane rather than JEditorPane, the main difference being that
  * JTextPane doesn't have a constructor that sets you set the HTML page immediately;
- * you have to call .setPage(). Which is fine. 
+ * you have to call .setPage(). Which is fine.
  */
 
 // Using AWT:
@@ -53,7 +53,6 @@ import javax.swing.JMenuBar;
 public class NuriFrame extends JFrame implements ActionListener, ComponentListener {
 
 	private static final long serialVersionUID = 1L;
-
 	private static final int buttonSpacing = 6;
 	
 	public NuriFrame() {
@@ -63,7 +62,7 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 	/** The parser object used to read in files. */
 	private NuriParser parser = null;
 	private NuriSolver solver = null;
-	private NuriState board = null;
+	private NuriBoard board = null;
 	private NuriVisualizer vis = null;
 
 	private JLabel statusLabel, depthLabel;
@@ -231,7 +230,7 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 	    	solver = null;
 	    	vis.setSolver(null);
 	    	if (isNew) {
-	    		board = new NuriState(boardSize.height, boardSize.width);
+	    		board = new NuriBoard(boardSize.height, boardSize.width);
 	    	} else {
 	    		board = board.resetCopy();
 	    	}

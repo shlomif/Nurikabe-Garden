@@ -1,16 +1,16 @@
 package net.huttar.nuriGarden;
 import java.util.Iterator;
 
-/** Iterates through the cells of a NuriState puzzle. */
+/** Iterates through the cells of a NuriBoard puzzle. */
 public class NurIterator implements Iterator<Coords> {
 
-	private NuriState puzzle;
+	private NuriBoard puzzle;
 	
 	int row;
 	
 	int column;
 	
-	public NurIterator(NuriState puzzle) {
+	public NurIterator(NuriBoard puzzle) {
 		super();
 		this.puzzle = puzzle;
 		row = 0;

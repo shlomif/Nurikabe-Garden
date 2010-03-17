@@ -69,11 +69,11 @@ class NuriVisualizer extends PApplet {
 	private int cellW = prefCellSize, cellH = prefCellSize;
 	
 	NuriFrame frame = null;
-	NuriState puz = null;
+	NuriBoard puz = null;
 	NuriSolver solver = null;
 	
 	
-	public NuriVisualizer(NuriState board, NuriSolver s) {
+	public NuriVisualizer(NuriBoard board, NuriSolver s) {
 		super();
 		puz = board;
 		solver = s;
@@ -104,7 +104,7 @@ class NuriVisualizer extends PApplet {
 		noLoop(); // draw only on demand, except during solving
 	}
         
-	void setSizeToBoard(NuriState puz) {
+	void setSizeToBoard(NuriBoard puz) {
 		int prefW = puz.getWidth() * prefCellSize + margin * 2;
 		int prefH = puz.getHeight() * prefCellSize + margin * 2; 
 		setPreferredSize(new Dimension(prefW, prefH));
@@ -124,7 +124,7 @@ class NuriVisualizer extends PApplet {
 	}
 	
 	//TODO: draw numbers in decimal (2-digit) when > 9
-    void drawGrid(NuriState puz) {
+    void drawGrid(NuriBoard puz) {
 		// System.out.println("In drawGrid() at " + System.currentTimeMillis()); // debugging
     	//TODO: probably need to add synchronization or sthg to make sure the board object doesn't disappear on us
     	// while we're accessing it.
@@ -166,13 +166,13 @@ class NuriVisualizer extends PApplet {
         		char c = puz.get(i, j);
         		short gl = puz.getGuessLevel(i, j);
         		int x = j * cellW + 1, y = i * cellH + 1;
-        		if (c == NuriState.BLACK) {
-        			setFill(gl, NuriState.BLACK);
+        		if (c == NuriBoard.BLACK) {
+        			setFill(gl, NuriBoard.BLACK);
     				rect(x, y, cellW - 1, cellH - 1);
-        		} else if (NuriState.isWhite(c)) {
-        			setFill(gl, NuriState.WHITE);
+        		} else if (NuriBoard.isWhite(c)) {
+        			setFill(gl, NuriBoard.WHITE);
 					rect(x, y, cellW - 1, cellH - 1);
-					if (NuriState.isANumber(c)) {
+					if (NuriBoard.isANumber(c)) {
 						drawNumber(c, x + cw2, y + numberHeight);
 						// text(c, x + cw2, y + numberHeight);
 					}
@@ -204,7 +204,7 @@ class NuriVisualizer extends PApplet {
      * c is character representation of digit.
      * Nudge left if 2-digit number. */
     private void drawNumber(char c, int x, int y) {
-    	int d = NuriState.numberValue(c);
+    	int d = NuriBoard.numberValue(c);
     	assert(d < 100); // The parser can't give us numbers > 99.
 		fill(0, 0, 0);  // black
     	if (d < 10)
@@ -220,10 +220,10 @@ class NuriVisualizer extends PApplet {
      */
     private void setFill(short guessLevel, char value) {
     	if (guessLevel == 0)
-    		fill(0, 0, (value == NuriState.BLACK) ? 0 : 100);
+    		fill(0, 0, (value == NuriBoard.BLACK) ? 0 : 100);
     	else
     		fill(guessLevel, 40,
-    				(value == NuriState.BLACK) ? 40 : 100);
+    				(value == NuriBoard.BLACK) ? 40 : 100);
     }
     
 	public void draw() {
@@ -253,7 +253,7 @@ class NuriVisualizer extends PApplet {
 			// TODO: beep or flash or something
 		} else {
 			puz.initializeCell(r, c,
-					(mouseButton == LEFT) ? NuriState.TOGGLEFWD : NuriState.TOGGLEBWD);
+					(mouseButton == LEFT) ? NuriBoard.TOGGLEFWD : NuriBoard.TOGGLEBWD);
 			puz.setGuessLevel(r, c, puz.searchDepth);
 			// update regions accordingly
 			// TODO: could optimize the following; it's kind of overkill.
