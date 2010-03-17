@@ -75,6 +75,16 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 		// space between buttons
 		buttonPanel.add(Box.createVerticalStrut(6));
 
+		JButton redrawButton = new JButton("Redraw");
+		redrawButton.setMnemonic(KeyEvent.VK_D);
+		redrawButton.setToolTipText("Redraw the puzzle board");
+		redrawButton.setActionCommand("redraw");
+		redrawButton.addActionListener(this);
+		buttonPanel.add(redrawButton);
+		
+		// space between buttons
+		buttonPanel.add(Box.createVerticalStrut(6));
+
 		JButton resetButton = new JButton("Reset");
 		resetButton.setMnemonic(KeyEvent.VK_R);
 		resetButton.setToolTipText("Clear the puzzle back to numbers only");
@@ -173,6 +183,8 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
         	solver.maybeStart();
         	solveButton.setEnabled(false);
         	vis.loop();
+        } else if ("redraw".equals(e.getActionCommand())) {
+        	vis.redraw();
         } else if ("quit".equals(e.getActionCommand())) {
         	System.exit(1);
         } else if ("reset".equals(e.getActionCommand())) {

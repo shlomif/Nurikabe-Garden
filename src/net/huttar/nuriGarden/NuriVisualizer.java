@@ -3,13 +3,14 @@
  *   So we need to detect a resize either here, or in the frame.
  *   Could detect it in the frame and then call vis.redraw().
  *   Or try to understand http://dev.processing.org/bugs/show_bug.cgi?id=209
+ *   I did this, and it works sometimes, but sometimes no redraw occurs.
  * DONE: I'm going to need text labels, buttons and stuff to give more info about
  * what's happening, and more user control. UI is outside the scope of Processing.
  * Surround the Processing applet component with a regular Java GUI frame
  * or whatever. Using Swing. Some say it's bloated, others say it's not substantially
  * slower than SWT. It sounds like Swing is more widespread and easier to use.
  * I'll go with it. I don't expect the UI to be the performance bottleneck. 
- * TODO: during solving, turn on loop; when not solving, turn it off.
+ * DONE: during solving, turn on loop; when not solving, turn it off.
  *  (but make sure redraw still occurs).
  * DONE: cache result of isSolved; pass it back and forth via setState; clear it when sthg changes
  * DONE: parse new file format (lgo_1500.txt)
