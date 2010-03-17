@@ -129,8 +129,8 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
         // pack();
 
         // TODO: parameterize; or get from a File Open dlg
-		parser = new NuriParser("samples/janko_ts.txt");
-		board = parser.loadFile(182); // Janko 25: two-digit
+		parser = new NuriParser("samples/huttar_ts.txt");
+		board = parser.loadFile(9); // Janko 25: two-digit
 		
 		// initial state, debug mode, visualizer
 		solver = new NuriSolver(board, false, vis);
