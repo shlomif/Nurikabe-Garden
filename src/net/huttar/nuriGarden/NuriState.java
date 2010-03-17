@@ -97,10 +97,10 @@ class NuriState implements Iterable<Coords>, Cloneable  {
 	private short[][] guessLevel;
 	
 	/** Number of white cells expected in the solution. */
-	private int expWhiteCount;
+	private int expWhiteCount = 0;
 
 	/** Number of black cells expected in the solution. */
-	private int expBlackCount;
+	private int expBlackCount = 0;
 	
 	/** list of white ucRegions being used during solving. */
 	ArrayList<UCRegion> whiteRegions;
@@ -127,6 +127,16 @@ class NuriState implements Iterable<Coords>, Cloneable  {
 	NuriState() {
 	}
 
+	/** Create object and initialize to given dimensions. */
+	public NuriState(int height, int width) {
+		newGrid(height, width);
+		for (int i = 0; i < getHeight(); i++)
+			for (int j = 0; j < getWidth(); j++)
+				initializeCell(i, j, UNKNOWN);			
+		updateGuessLevel();
+		prepareStats(true);
+	}
+
 	void setState(char[][] grid, ArrayList<UCRegion> blackRegions,
 			ArrayList<UCRegion> whiteRegions, short searchDepth, int numUnknownCells) {
 		this.blackRegions = blackRegions;
@@ -138,21 +148,25 @@ class NuriState implements Iterable<Coords>, Cloneable  {
 
 	/**
 	 * Initialize blackRegions, whiteRegions, and other derived data.
+	 * If isNew is true, assume all cells are UNKNOWN.
 	 */
-	protected void prepareStats() {
+	protected void prepareStats(boolean isNew) {
 		/* Initialize ucRegions. At first there are no black regions. */
 		blackRegions = new ArrayList<UCRegion>();
 		whiteRegions = new ArrayList<UCRegion>();
-
-		for (Coords cell : this) {
-			if (isANumber(get(cell))) {
-				UCRegion region = new UCRegion(this, cell); 
-				whiteRegions.add(region);
-				expWhiteCount += region.getLimit();
-			} else if (get(cell) == BLACK && containingRegion(cell) == null) {
-				// sometimes we have black cells in input files for testing.
-				UCRegion region = new UCRegion(this, cell); 
-				blackRegions.add(region);
+		expWhiteCount = 0;
+		
+		if (!isNew) {
+			for (Coords cell : this) {
+				if (isANumber(get(cell))) {
+					UCRegion region = new UCRegion(this, cell); 
+					whiteRegions.add(region);
+					expWhiteCount += region.getLimit();
+				} else if (get(cell) == BLACK && containingRegion(cell) == null) {
+					// sometimes we have black cells in input files for testing.
+					UCRegion region = new UCRegion(this, cell); 
+					blackRegions.add(region);
+				}
 			}
 		}
 		expBlackCount = getHeight() * getWidth() - expWhiteCount;
@@ -182,7 +196,7 @@ class NuriState implements Iterable<Coords>, Cloneable  {
 			else
 				newBoard.grid[cell.getRow()][cell.getColumn()] = UNKNOWN;
 		}
-		newBoard.prepareStats();
+		newBoard.prepareStats(false);
 		return newBoard;
 	}
 

@@ -56,7 +56,7 @@ class NuriParser {
 							(symbol == NuriState.WHITE || symbol == '-') ? NuriState.UNKNOWN : symbol);
 				}
 			}
-			puz.prepareStats();
+			puz.prepareStats(false);
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -155,7 +155,7 @@ class NuriParser {
 					}
 				}
 				
-				puz.prepareStats();
+				puz.prepareStats(false);
 				
 			} catch (IOException e) {
 				e.printStackTrace();
