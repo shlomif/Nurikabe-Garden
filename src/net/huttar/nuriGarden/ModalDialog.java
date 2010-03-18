@@ -33,7 +33,7 @@ public class ModalDialog extends JDialog {
 			"Please enter the dimensions of the new puzzle, in the format 10x8.",
 			"Dimensions", JOptionPane.QUESTION_MESSAGE);
 		result = parseDimension(inputValue, parent);
-		if (result.width <= 0 || result.height <= 0) {
+		if (result != null && (result.width <= 0 || result.height <= 0)) {
 	        JOptionPane.showMessageDialog(parent,
 	    			"The width and height of the new board must each be greater than zero.",
 	    			"Invalid Dimensions", JOptionPane.ERROR_MESSAGE);
