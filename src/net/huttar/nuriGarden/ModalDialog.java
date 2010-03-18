@@ -33,6 +33,12 @@ public class ModalDialog extends JDialog {
 			"Please enter the dimensions of the new puzzle, in the format 10x8.",
 			"Dimensions", JOptionPane.QUESTION_MESSAGE);
 		result = parseDimension(inputValue, parent);
+		if (result.width <= 0 || result.height <= 0) {
+	        JOptionPane.showMessageDialog(parent,
+	    			"The width and height of the new board must each be greater than zero.",
+	    			"Invalid Dimensions", JOptionPane.ERROR_MESSAGE);
+	        return null;
+		}
 		return result;
 	}
 
@@ -60,7 +66,7 @@ public class ModalDialog extends JDialog {
     	}
 
         JOptionPane.showMessageDialog(parent,
-    			"Could not parse specified dimensions.\nPlease use WxH format, e.g. 11x9.",
+    			"Could not parse the specified dimensions.\nPlease use WxH format, e.g. 11x9.",
     			"Invalid Dimensions", JOptionPane.ERROR_MESSAGE);
         return null;
     }
