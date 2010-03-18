@@ -242,23 +242,9 @@ class NuriVisualizer extends PApplet {
 		int c = (mouseX - margin) / cellW;
 		int r = (mouseY - margin) / cellH;
 		// System.out.println("Mouse clicked in cell: " + c + ", " + r);
-		toggleCellState(r, c);
+		frame.clickedCell(r, c, (mouseButton == LEFT));
 	}
 	
-	private void toggleCellState(int r, int c) {
-		if (solver.isAlive()) {
-			// TODO: beep or flash or something
-		} else {
-			puz.initializeCell(r, c,
-					(mouseButton == LEFT) ? NuriBoard.TOGGLEFWD : NuriBoard.TOGGLEBWD);
-			puz.setGuessLevel(r, c, puz.searchDepth);
-			// update regions accordingly
-			// TODO: could optimize the following; it's kind of overkill.
-			puz.prepareStats(false);
-			redraw();
-		}
-	}
-
 	//TODO: move these controls out of visualizer
 	public void keyPressed() {
 		// System.out.println("Visualizer got key: " + key);

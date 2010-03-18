@@ -1,6 +1,17 @@
 package net.huttar.nuriGarden;
 
 /**
+ * ##TODO CREATING: a way to place numbers. Suggest an editing mode and a solving mode.
+ * "New" switches to editing mode automatically. "Solve" does the reverse.
+ * Also provide manual mode switch.
+ * TODO: Mouse click places a number: the current number.
+ *   numbers 1-9 set the current number. 0 means current *= 10. +/- increment/decrement.
+ *   Clicking on an existing number overwrites it with the current number.
+ *   Del deletes the number at the last-edit cell, if any.
+ * TODO CREATING: provide a way to save. 1st - to new file (.puz). 2nd - append to file (.txt format)
+ *   with id, comment, maybe solution.
+ * TODO: file open dialog; from whole file (.puz) or from one-in-file, by ID (.txt) 
+ * TODO: vis should show most recent edit, when in edit mode
  * DONE: visualizer doesn't show guesses any more! or at least not in color...
  * TODO: Need a way to stop solver, leaving its sure results on the board but
  * allowing user to set white/black; then restart solver taking into account those
@@ -63,6 +74,11 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 	
 	private JButton solveButton;
 	private Box buttonPanel;
+	
+	private int currentNumber = 1;
+	
+	public enum GardenMode { EDIT, SOLVE };
+	GardenMode gardenMode = GardenMode.SOLVE;
 		
 	private void init() {
 		// helpful: see http://zetcode.com/tutorials/javaswingtutorial/swinglayoutmanagement/
@@ -210,6 +226,7 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 		} else if ("solve".equals(e.getActionCommand())) {
         	solver.maybeStart();
         	solveButton.setEnabled(false);
+        	gardenMode = GardenMode.SOLVE;
         	vis.loop();
         } else if ("redraw".equals(e.getActionCommand())) {
         	vis.redraw();
@@ -229,6 +246,7 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 		if (isNew) {
 			boardSize = ModalDialog.getBoardDimensions(this); // new Dimension(9, 9); // 
 			if (boardSize == null) return; // if user canceled
+			gardenMode = GardenMode.EDIT;
 		}
 
 		/** Don't let the solver thread or visualizer
@@ -275,4 +293,44 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
     public void componentShown(ComponentEvent e) {
     	if (vis != null) vis.redraw();
 	}
+
+    /** Handle mouse click on visualizer at given cell. Mode-dependent. */
+	public void clickedCell(int r, int c, boolean isLeft) {
+		if (gardenMode == GardenMode.SOLVE) {
+			toggleCellState(r, c, isLeft);
+		} else {
+			placeNumber(r, c, currentNumber);
+		}
+	}
+	
+	/** Place new number on board.
+	 * ##TODO: update other state accordingly.
+	 */
+	private void placeNumber(int r, int c, int n) {
+		// Assume solver is not running. Otherwise we would not be in edit mode, and
+		// couldn't get here.
+		assert(!solver.isAlive());
+		board.initializeCell(r, c, NuriBoard.NUMBERS.charAt(n-1));
+		board.setGuessLevel(r, c, (short)0);
+		board.prepareStats(false);
+		//DONE: reset solver completely.
+		solver = new NuriSolver(board, false, vis);
+		vis.setSolver(solver);
+		vis.redraw();
+	}
+
+	private void toggleCellState(int r, int c, boolean isLeft) {
+		if (solver.isAlive()) {
+			// TODO: beep or flash or something
+		} else {
+			board.initializeCell(r, c,
+					isLeft ? NuriBoard.TOGGLEFWD : NuriBoard.TOGGLEBWD);
+			board.setGuessLevel(r, c, board.searchDepth);
+			// update regions accordingly
+			// TODO: could optimize the following; it's kind of overkill.
+			board.prepareStats(false);
+			vis.redraw();
+		}
+	}
+
 }
