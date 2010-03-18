@@ -19,3 +19,10 @@ In package explorer, open src/net.huttar.nuriGarden/NuriFrame.java
 		board = parser.loadFile(182); // index of puzzle
   Press F11 to build and run.
 
+
+Using Nurikabe Garden:
+Click Solve to solve the puzzle.
+  While solving, press 'p' to pause, 's' to go one step at a time, 'c' to continue. (broken at the moment!) 
+Click Reset to clear solving attempts, leaving only the numbers.
+Click on a square in the puzzle to change its state between white, black, and unknown (gray).
+Click New (or press Ctrl+N) to create a new puzzle.

@@ -69,6 +69,7 @@ class NuriBoard implements Iterable<Coords>, Cloneable  {
 
 	/** Allowed number characters: 1 to 35, base 36 */
 	static final String NUMBERS = "123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	static final int maxCellValue = NUMBERS.length();
 	
 //	/** The solver using this board state. */
 //	private NuriSolver solver;
@@ -674,5 +675,15 @@ class NuriBoard implements Iterable<Coords>, Cloneable  {
 	 */
 	boolean alreadyIs(Coords cell, char value) {
 		return (unifyWhite(get(cell)) == unifyWhite(value));
+	}
+
+	/** Return string describing given cell value, e.g. white or black. */
+	static String valueName(char c) {
+		switch (c) {
+		case NuriBoard.WHITE: return "white";
+		case NuriBoard.BLACK: return "black";
+		case NuriBoard.UNKNOWN: return "unknown";
+		default: return null;
+		}
 	}
 }

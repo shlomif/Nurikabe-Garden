@@ -245,52 +245,9 @@ class NuriVisualizer extends PApplet {
 		frame.clickedCell(r, c, (mouseButton == LEFT));
 	}
 	
-	//TODO: move these controls out of visualizer
+	//TODO: detect keys in the frame, not in the visualizer
 	public void keyPressed() {
-		// System.out.println("Visualizer got key: " + key);
-
-		switch(key) {
-		case '1':
-			solver.stopMode = StopMode.ONESTEP;
-			solver.threadSuspended = false;
-			break;
-		case ' ':
-		case 'p':
-			solver.stopMode = StopMode.CONTINUE;
-			solver.threadSuspended = !solver.threadSuspended;
-			break;
-		case 'c':
-		case 'C':
-			solver.stopMode = StopMode.CONTINUE;
-			solver.threadSuspended = false;
-			break;
-		case 'i':
-		case 'I':
-			solver.stopMode = StopMode.STEPIN;
-			solver.setStepStopDepth(1);
-			break;
-		case 'u':
-		case 'U':
-			solver.stopMode = StopMode.STEPOUT;
-			solver.setStepStopDepth(-1);
-			break;
-		case 'v':
-		case 'V':
-			solver.stopMode = StopMode.STEPOVER;
-			solver.setStepStopDepth(0);
-			break;
-		default:
-			System.out.println("Unknown key " + key);
-			return;
-		}
-
-		solver.maybeStart(); // start if not yet started
-
-		if (!solver.threadSuspended) {
-			synchronized(this) {
-	            this.notifyAll();					
-			}
-		}
+		frame.keyPressed(key);
 	}
 
 	void setSolver(NuriSolver s) {

@@ -3,11 +3,13 @@ package net.huttar.nuriGarden;
 /**
  * DONE CREATING: a way to place numbers. Suggest an editing mode and a solving mode.
  * "New" switches to editing mode automatically. "Solve" does the reverse.
+ * TODO: different cursor to represent editing vs solving mode. Maybe even bg color.
  * TODO: Also provide manual mode switch.
- * TODO: Mouse click places a number: the current number.
- *   numbers 1-9 set the current number. 0 means current *= 10. +/- increment/decrement.
- *   Clicking on an existing number overwrites it with the current number.
- *   Del deletes the number at the last-edit cell, if any.
+ * DONE: Mouse click places a number: the current number.
+ *   numbers 1-9 set the current number TODO: (and modifies the last-edit number if any).
+ *   DONE: 0 means current *= 10. +/- increment/decrement.
+ *   DONE: Clicking on an existing number overwrites it with the current number.
+ *   TODO: Del deletes the number at the last-edit cell, if any.
  * TODO CREATING: provide a way to save. 1st - to new file (.puz). 2nd - append to file (.txt format)
  *   with id, comment, maybe solution.
  * TODO: file open dialog; from whole file (.puz) or from one-in-file, by ID (.txt) 
@@ -46,6 +48,8 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.BorderFactory;
 import javax.swing.JMenuBar;
+
+import net.huttar.nuriGarden.NuriSolver.StopMode;
 
 /** 
  * Frame for Nurikabe Garden. Using AWT because Processing (NuriVisualizer)
@@ -225,20 +229,19 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 			resetBoard(true);
 		} else if ("solve".equals(e.getActionCommand())) {
         	solver.maybeStart();
-        	solveButton.setEnabled(false);
-        	gardenMode = GardenMode.SOLVE;
+        	setGardenMode(GardenMode.SOLVE);
         	vis.loop();
         } else if ("redraw".equals(e.getActionCommand())) {
         	vis.redraw();
         } else if ("quit".equals(e.getActionCommand())) {
-        	System.exit(1);
+        	quit();
         } else if ("resetBoard".equals(e.getActionCommand())) {
         	resetBoard(false);
         } else {
         	// assert(false); // unrecognized action event
         }
     }
-
+	
 	/** Erase black & white cell states, leaving only numbers. 
 	 * If isNew, create a fresh puzzle board, using pop up dialog to ask for dimensions. */
 	void resetBoard(boolean isNew) {
@@ -246,13 +249,13 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 		if (isNew) {
 			boardSize = ModalDialog.getBoardDimensions(this); // new Dimension(9, 9); // 
 			if (boardSize == null) return; // if user canceled
-			gardenMode = GardenMode.EDIT;
+			setGardenMode(GardenMode.EDIT);
 		}
 
 		/** Don't let the solver thread or visualizer
 		 * access the board or solver while they're null.
 		 */
-		synchronized(vis) {
+		synchronized(this) {
 			solver.threadSuspended = true;
 			solver.stopMode = NuriSolver.StopMode.EXIT;
 			vis.noLoop();
@@ -271,6 +274,11 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 		}
 		statusLabel.setText("Board cleared.");
 		depthLabel.setText("");
+	}
+
+	private void setGardenMode(GardenMode mode) {
+		gardenMode = mode;
+		solveButton.setEnabled(mode == GardenMode.EDIT);
 	}
 
 	public static void main(String[] args) {
@@ -294,7 +302,126 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
     	if (vis != null) vis.redraw();
 	}
 
-    /** Handle mouse click on visualizer at given cell. Mode-dependent. */
+
+	void keyPressed(char key) {
+		int newNumber = currentNumber;
+		
+		// System.out.println("Visualizer got key: " + key);
+		/* First, set mode based on key categories: */
+		switch(key) {
+		case ' ':
+		case 'p':
+		case 'c':
+		case 'C':
+		case 'i':
+		case 'I':
+		case 'u':
+		case 'U':
+		case 'v':
+		case 'V':
+			setGardenMode(GardenMode.SOLVE);
+			break;
+		case KeyEvent.VK_ESCAPE:
+			quit();
+			return;
+		case '+':
+		case '=':
+			setGardenMode(GardenMode.EDIT);
+			break;
+		default:
+			if (Character.isDigit(key))
+				setGardenMode(GardenMode.EDIT);
+			break;
+		}
+		
+		/* Now more specific actions for individual keys: */
+		/**##FIXME: single-stepping is broken right now! */
+		switch(key) {
+		case ' ':
+		case 'p':
+			solver.stopMode = StopMode.CONTINUE;
+			solver.threadSuspended = !solver.threadSuspended;
+			break;
+		case 's':
+			solver.stopMode = StopMode.ONESTEP;
+			solver.threadSuspended = false;
+			break;
+		case 'c':
+		case 'C':
+			solver.stopMode = StopMode.CONTINUE;
+			solver.threadSuspended = false;
+			break;
+		case 'i':
+		case 'I':
+			solver.stopMode = StopMode.STEPIN;
+			solver.setStepStopDepth(1);
+			solver.threadSuspended = false;
+			break;
+		case 'u':
+		case 'U':
+			solver.stopMode = StopMode.STEPOUT;
+			solver.setStepStopDepth(-1);
+			solver.threadSuspended = false;
+			break;
+		case 'v':
+		case 'V':
+			solver.stopMode = StopMode.STEPOVER;
+			solver.setStepStopDepth(0);
+			solver.threadSuspended = false;
+			break;
+		case '-':
+			newNumber--;
+			break;
+		case '+':
+		case '=':
+			newNumber++;
+			break;
+
+		default:
+			if (Character.isDigit(key)) {
+				if (key == '0')
+					newNumber *= 10;
+				else
+					newNumber = NuriBoard.numberValue(key);
+			} else {
+				System.out.println("Unrecognized key: " + key);
+				return;
+			}
+		}
+
+		if (gardenMode == GardenMode.SOLVE) {
+			solver.maybeStart(); // start if not yet started
+	
+			if (!solver.threadSuspended) {
+				synchronized(this) {
+		            this.notifyAll();					
+				}
+			}
+		} else {
+			if (newNumber < 1) newNumber = 1;
+			else if (newNumber > NuriBoard.maxCellValue)
+				newNumber = NuriBoard.maxCellValue; 
+	
+			/** TODO: also change last edited cell's number, if any
+			if (newNumber != currentNumber &&
+					lastChangedCell != null &&
+					board.isANumber(board.get(lastChangedCell)))
+					placeNumber(lastChangedCell.r, lastChangedCell.c,
+						board.NUMBERS.charAt(newNumber));
+			*/
+			
+			currentNumber = newNumber;
+			/** TODO: display currentNumber on a status label somewhere. */
+		}
+	}
+
+	/** Check for unsaved data and confirm if necessary; then close frame. */
+    private void quit() {
+    	//TODO: check for unsaved data
+    	System.exit(1); //TODO: exit frame more cleanly
+	}
+
+	/** Handle mouse click on visualizer at given cell. Mode-dependent. */
 	public void clickedCell(int r, int c, boolean isLeft) {
 		if (gardenMode == GardenMode.SOLVE) {
 			toggleCellState(r, c, isLeft);
@@ -304,7 +431,7 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 	}
 	
 	/** Place new number on board.
-	 * ##TODO: update other state accordingly.
+	 * ##TODO: update other state accordingly. Maybe that's done?
 	 */
 	private void placeNumber(int r, int c, int n) {
 		// Assume solver is not running. Otherwise we would not be in edit mode, and
@@ -312,6 +439,7 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 		assert(!solver.isAlive());
 		board.initializeCell(r, c, NuriBoard.NUMBERS.charAt(n-1));
 		board.setGuessLevel(r, c, (short)0);
+		/** TODO: if two numbers are adjacent, mark them red or something. */ 
 		board.prepareStats(false);
 		//DONE: reset solver completely.
 		solver = new NuriSolver(board, false, vis);

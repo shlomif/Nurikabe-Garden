@@ -549,7 +549,8 @@ class NuriSolver extends Thread  {
 				}
 				/* Neighbors are either all white or all black. Conform. */
 				if (board.get(cell) != NuriBoard.UNKNOWN && NuriBoard.isWhite(board.get(cell)) != NuriBoard.isWhite(firstValue))
-					throw new ContradictionException(cell + " surrounded by opposite color");
+					throw new ContradictionException(NuriBoard.valueName(board.get(cell)) +
+							" cell at " + cell + " is surrounded by opposite color");
 				infer(board, cell, firstValue, "5");
 			}
 		}
