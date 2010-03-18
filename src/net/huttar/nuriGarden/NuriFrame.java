@@ -1,7 +1,7 @@
 package net.huttar.nuriGarden;
 
 /**
- * FIXME: visualizer doesn't show guesses any more! or at least not in color...
+ * DONE: visualizer doesn't show guesses any more! or at least not in color...
  * TODO: Need a way to stop solver, leaving its sure results on the board but
  * allowing user to set white/black; then restart solver taking into account those
  * new settings.
@@ -10,36 +10,30 @@ package net.huttar.nuriGarden;
  * html describing the rule.
  * See http://www.softcoded.com/web_design/java_help_files.php
  * for processing hyperlinks.
+ * Also http://www.devdaily.com/blog/post/jfc-swing/how-create-simple-swing-html-viewer-browser-java
  * Can use JTextPane rather than JEditorPane, the main difference being that
  * JTextPane doesn't have a constructor that sets you set the HTML page immediately;
  * you have to call .setPage(). Which is fine.
  */
 
 // Using AWT:
-//import java.awt.Frame;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
-// import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.KeyEvent;
-// import java.awt.Insets;
-//import java.awt.Label;
-// Using Swing:
-// import java.awt.GridLayout;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-// import javax.swing.JPanel;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 import javax.swing.BorderFactory;
-// import javax.swing.border.Border;
-// import javax.swing.border.EmptyBorder;
 import javax.swing.JMenuBar;
 
 /** 
@@ -69,13 +63,26 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 	
 	private JButton solveButton;
 	private Box buttonPanel;
-	
+		
 	private void init() {
 		// helpful: see http://zetcode.com/tutorials/javaswingtutorial/swinglayoutmanagement/
 		Container panel = this.getContentPane();
 
+		//FIXME: menu disappears behind PApplet. Need to catch event when any menu opens
+		// and pause the visualizer?  (noLoop())
+		// No, that won't help... it's already not looping. The problem is the z-order 
+		// difference between AWT & Swing... http://blogs.sun.com/Swing/entry/awt_swt_swing_java_gui1
+		// Solution would be to move menu and PApplet into different windows;
+		// or stop using Processing. Or switch from Swing to AWT.
+		// The last two mean a loss of coding investment.
 		JMenuBar menu = new JMenuBar();
 		panel.add(menu, BorderLayout.NORTH);
+		JMenu fileMenu = new JMenu("File");
+		fileMenu.setMnemonic(KeyEvent.VK_F); // probably need a makeMenuItem method
+		JMenuItem saveItem = new JMenuItem("Save");
+		saveItem.setMnemonic(KeyEvent.VK_S);
+		fileMenu.add(saveItem);
+		menu.add(fileMenu);
 		
 		buttonPanel = new Box(BoxLayout.Y_AXIS);
 		// BoxLayout boxLayout = new BoxLayout(buttonPanel, BoxLayout.Y_AXIS);
@@ -85,6 +92,10 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 		
 		makeButton("New", KeyEvent.VK_N,
 				"Create a new puzzle", "new");
+		// TODO: make Ctrl+N work for this.
+		// Probably by making a menu item.
+		// This doesn't work: newButton.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S,
+        //  java.awt.Event.CTRL_MASK));
 		
 		solveButton = makeButton("Solve", KeyEvent.VK_S,
 			"Attempt to solve the puzzle uniquely",	"solve");
@@ -92,8 +103,8 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 		makeButton("Redraw", KeyEvent.VK_D,
 			"Redraw the puzzle board", "redraw");
 
-		makeButton("Reset", KeyEvent.VK_R,
-			"Clear the puzzle back to numbers only", "reset");
+		makeButton("Reset Board", KeyEvent.VK_B,
+			"Clear the puzzle back to numbers only", "resetBoard");
 
 		makeButton("Exit", KeyEvent.VK_X,
 			"Exit Nurikabe Garden", "quit");
@@ -122,7 +133,7 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
         // TODO: get frame to properly surround PApplet.
         setSize(700, 500);
         setResizable(true);
-        // pack();
+        // pack(); Doesn't work! :-)
 
         // TODO: parameterize; or get from a File Open dlg
 		// parser = new NuriParser("samples/huttar_ts.txt");
@@ -204,7 +215,7 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
         	vis.redraw();
         } else if ("quit".equals(e.getActionCommand())) {
         	System.exit(1);
-        } else if ("reset".equals(e.getActionCommand())) {
+        } else if ("resetBoard".equals(e.getActionCommand())) {
         	resetBoard(false);
         } else {
         	// assert(false); // unrecognized action event
@@ -216,7 +227,7 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 	void resetBoard(boolean isNew) {
 		Dimension boardSize = null;
 		if (isNew) {
-			boardSize = new Dimension(9, 9); // getBoardDimensions();
+			boardSize = ModalDialog.getBoardDimensions(this); // new Dimension(9, 9); // 
 			if (boardSize == null) return; // if user canceled
 		}
 

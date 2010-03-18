@@ -239,7 +239,9 @@ class NuriSolver extends Thread  {
 			//TODO: use child threads for the two searches, if appropriate.
 			// How do we find out whether multiple processors are available?
 			if (!trySearch(board, unknownCell, color, false))
-				// Try out other hypothesis.
+				// If one color hypothesis is false, try out other hypothesis.
+				// If it works, it's surely correct. If it doesn't work, the board state is already wrong
+				// (contradiction).
 				trySearch(board, unknownCell, NuriBoard.isWhite(color) ? NuriBoard.BLACK : NuriBoard.WHITE, true);
 		}
 
@@ -261,7 +263,7 @@ class NuriSolver extends Thread  {
 		board.set(cell, value);
 		board.setGuessLevel(cell, board.searchDepth);
 		debugMsg(searchDepth(), "\n" + cell.toString());
-		//##TODO: fix these booleans regarding stepping in, out
+		//TODO: fix these booleans regarding stepping in, out
 		checkControls(false, false);	// obey execution controls
 	}
 	
@@ -282,9 +284,7 @@ class NuriSolver extends Thread  {
 		try {
 			debugMsg(searchDepth(), "Trying " + hypoth + "...");
 			infer(trialBoard, cell, value, hypothesisLabel);
-			/** TODO: Careful here... do we need to create a recursive instance
-			 * of solver? That's how we were doing it before...
-			 * Which means creating a separate thread? */
+			/** Recursively solve */
 			boolean result = solve(trialBoard);
 			debugMsg(searchDepth(), hypoth + " success: " + result);
 			if (result) {
@@ -679,6 +679,10 @@ class NuriSolver extends Thread  {
 		visualizer = vis;
 	}
 
+	/** reset solver to last sure board state. ##TODO implement. */
+	void resetToSure() {
+	}
+	
 	//// The following was for trying to change a cell state by user input while the solver
 	//// was running. Dumb idea... way too complicated for now. May resurrect later if important.
 //	/** When cellToSet is non-null, solver must stop when convenient and set the cell

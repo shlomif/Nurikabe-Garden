@@ -228,15 +228,12 @@ class NuriVisualizer extends PApplet {
     
 	public void draw() {
 		// System.out.println("In draw() at " + System.currentTimeMillis()); // debugging
-		if (solver != null) {
-			if (puz == null) {
-				puz = solver.latestBoard;
-				setSizeToBoard(puz);
-			}
-			if (puz != null) {
-				drawGrid(puz);
-				frame.updateStatus();
-			}
+		if (solver != null && solver.latestBoard != null) {
+			if (puz == null)				
+				setSizeToBoard(solver.latestBoard);
+			puz = solver.latestBoard;
+			drawGrid(puz);
+			frame.updateStatus();
 		}
 	}
 	
