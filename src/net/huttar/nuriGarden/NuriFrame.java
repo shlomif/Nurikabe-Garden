@@ -1,9 +1,9 @@
 package net.huttar.nuriGarden;
 
 /**
- * ##TODO CREATING: a way to place numbers. Suggest an editing mode and a solving mode.
+ * DONE CREATING: a way to place numbers. Suggest an editing mode and a solving mode.
  * "New" switches to editing mode automatically. "Solve" does the reverse.
- * Also provide manual mode switch.
+ * TODO: Also provide manual mode switch.
  * TODO: Mouse click places a number: the current number.
  *   numbers 1-9 set the current number. 0 means current *= 10. +/- increment/decrement.
  *   Clicking on an existing number overwrites it with the current number.
