@@ -1,20 +1,21 @@
 package net.huttar.nuriGarden;
 
 /**
+ * TODO: vis should show most recent edited cell, when in edit mode
  * DONE CREATING: a way to place numbers. Suggest an editing mode and a solving mode.
- * "New" switches to editing mode automatically. "Solve" does the reverse.
+ * DONE: "New" switches to editing mode automatically. "Solve" does the reverse.
  * TODO: different cursor to represent editing vs solving mode. Maybe even bg color.
  * TODO: Also provide manual mode switch.
  * DONE: Mouse click places a number: the current number.
- *   numbers 1-9 set the current number TODO: (and modifies the last-edit number if any).
+ *   DONE: numbers 1-9 set the current number
+ *      TODO: (and modifies the last-edited-cell's number if any).
  *   DONE: 0 means current *= 10. +/- increment/decrement.
  *   DONE: Clicking on an existing number overwrites it with the current number.
  *   TODO: Del deletes the number at the last-edit cell, if any.
  * TODO CREATING: provide a way to save. 1st - to new file (.puz). 2nd - append to file (.txt format)
  *   with id, comment, maybe solution.
  * TODO: file open dialog; from whole file (.puz) or from one-in-file, by ID (.txt) 
- * TODO: vis should show most recent edit, when in edit mode
- * DONE: visualizer doesn't show guesses any more! or at least not in color...
+ * FIXED: visualizer doesn't show guesses any more! or at least not in color...
  * TODO: Need a way to stop solver, leaving its sure results on the board but
  * allowing user to set white/black; then restart solver taking into account those
  * new settings.
