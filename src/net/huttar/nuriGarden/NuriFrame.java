@@ -13,9 +13,11 @@ package net.huttar.nuriGarden;
  *   DONE: 0 means current *= 10. +/- increment/decrement.
  *   DONE: Clicking on an existing number overwrites it with the current number.
  *   TODO: Del deletes the number at the last-edit cell, if any.
- * TODO CREATING: provide a way to save. 1st - to new file (.puz). 2nd - append to file (.txt format)
- *   with id, comment, maybe solution.
- * TODO: file open dialog; from whole file (.puz) or from one-in-file, by ID (.txt) 
+ * DONE CREATING: provide a way to save.
+ * DONE: 1st - to new file (.puz).
+ * TODO: 2nd - append to file (.txt format) with id, comment, maybe solution.
+ * ##TODO: file open dialog; from whole file (.puz); then can take out hard-wired puzzle load on startup
+ *   TODO: load from one-in-file, by ID (.txt) 
  * FIXED: visualizer doesn't show guesses any more! or at least not in color...
  * TODO: Need a way to stop solver, leaving its sure results on the board but
  * allowing user to set white/black; then restart solver taking into account those
