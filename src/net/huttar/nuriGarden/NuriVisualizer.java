@@ -51,8 +51,6 @@ import java.awt.Dimension;
 import processing.core.PApplet;
 import processing.core.PFont;
 
-import net.huttar.nuriGarden.NuriSolver.StopMode;
-
 class NuriVisualizer extends PApplet {
 
 	/**

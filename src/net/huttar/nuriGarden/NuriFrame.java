@@ -1,6 +1,7 @@
 package net.huttar.nuriGarden;
 
 /**
+ * TODO: an "undo" button for edits
  * TODO: vis should show most recent edited cell, when in edit mode
  * DONE CREATING: a way to place numbers. Suggest an editing mode and a solving mode.
  * DONE: "New" switches to editing mode automatically. "Solve" does the reverse.
@@ -39,6 +40,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.KeyEvent;
+import java.io.File;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -76,7 +78,6 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 	private NuriVisualizer vis = null;
 
 	private JLabel statusLabel, depthLabel;
-	
 	private JButton solveButton;
 	private Box buttonPanel;
 	
@@ -118,8 +119,11 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 		// This doesn't work: newButton.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S,
         //  java.awt.Event.CTRL_MASK));
 		
-		solveButton = makeButton("Solve", KeyEvent.VK_S,
-			"Attempt to solve the puzzle uniquely",	"solve");
+		makeButton("Save", KeyEvent.VK_A,
+				"Save puzzle to a file", "save");
+
+		solveButton = makeButton("Solve", KeyEvent.VK_O,
+			"Attempt to solve the puzzle uniquely", "solve");
 
 		makeButton("Redraw", KeyEvent.VK_D,
 			"Redraw the puzzle board", "redraw");
@@ -228,6 +232,8 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 	public void actionPerformed(ActionEvent e) {
 		if ("new".equals(e.getActionCommand())) {
 			resetBoard(true);
+        } else if ("save".equals(e.getActionCommand())) {
+        	save();
 		} else if ("solve".equals(e.getActionCommand())) {
         	solver.maybeStart();
         	setGardenMode(GardenMode.SOLVE);
@@ -243,6 +249,13 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
         }
     }
 	
+	/** Launch a file-save dialog, and save the current board to a file. */
+	private void save() {
+		if (board == null) return;
+		File file = ModalDialog.getSaveFile(this); // new Dimension(9, 9); // 
+		if (file != null) NuriWriter.saveToFile(this, board, file);
+	}
+
 	/** Erase black & white cell states, leaving only numbers. 
 	 * If isNew, create a fresh puzzle board, using pop up dialog to ask for dimensions. */
 	void resetBoard(boolean isNew) {

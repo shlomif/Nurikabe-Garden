@@ -528,7 +528,9 @@ class NuriBoard implements Iterable<Coords>, Cloneable  {
 	public String toString() {
 		return toString(null);
 	}
-	
+
+	/** Output current state, including solving attempts, as a string
+	 * ("puz" format but with spacing for easier reading). */
 	String toString(Coords modified) {
 		StringBuilder result = new StringBuilder();
 		StringBuilder indent = new StringBuilder();
@@ -550,6 +552,21 @@ class NuriBoard implements Iterable<Coords>, Cloneable  {
 		return result.toString();
 	}
 
+	/** Output numbers, as a string
+	 * ("puz" format). */
+	String puzzle() {
+		StringBuilder result = new StringBuilder();
+		for (int r = 0; r < getHeight(); r++) {
+			for (int c = 0; c < getWidth(); c++) {
+				if (isANumber(grid[r][c]))
+					result.append(grid[r][c]);
+				else
+					result.append('-');
+			}
+			result.append("\n");				
+		}
+		return result.toString();
+	}
 
 	/** Return true if the puzzle been solved, i.e. the color of all squares is
 	 * known, and the solution is valid.

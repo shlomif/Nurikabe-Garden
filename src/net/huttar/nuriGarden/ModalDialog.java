@@ -2,9 +2,11 @@ package net.huttar.nuriGarden;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.io.File;
 import java.util.StringTokenizer;
 
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
@@ -15,6 +17,7 @@ import javax.swing.JOptionPane;
  */
 public class ModalDialog extends JDialog {
 	private static final long serialVersionUID = 1L;
+	private static JFileChooser fileChooser = null;
 	
 	String type = null, title = null;
 	// static ModalDialog dimensionsDialog = null;
@@ -70,5 +73,30 @@ public class ModalDialog extends JDialog {
     			"Invalid Dimensions", JOptionPane.ERROR_MESSAGE);
         return null;
     }
+
+    /** run a fileChooser save dialog, confirm overwrite if applicable, and return File
+     * if successful. */
+	public static File getSaveFile(NuriFrame nuriFrame) {
+		if (fileChooser == null)
+			fileChooser = new JFileChooser();
+		int result = fileChooser.showSaveDialog(nuriFrame);
+		if (result == JFileChooser.APPROVE_OPTION) {
+			File file = fileChooser.getSelectedFile();
+			if (file.exists()) {
+				// confirm overwrite
+				if (JOptionPane.showConfirmDialog(nuriFrame,
+						"Overwrite existing file?",
+						"Confirm Overwrite",
+						JOptionPane.OK_CANCEL_OPTION,
+						JOptionPane.WARNING_MESSAGE) == JOptionPane.OK_OPTION) {
+					return file;
+				}
+				// else user canceled warning dialog.
+				else return null;
+			} else return file;
+		}
+		// else user canceled save file chooser.
+		return null;
+	}
 
 }
