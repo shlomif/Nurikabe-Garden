@@ -74,7 +74,7 @@ public class ModalDialog extends JDialog {
         return null;
     }
 
-    /** run a fileChooser save dialog, confirm overwrite if applicable, and return File
+    /** Run a fileChooser save dialog, confirm overwrite if applicable, and return File
      * if successful. */
 	public static File getSaveFile(NuriFrame nuriFrame) {
 		if (fileChooser == null)
@@ -99,4 +99,21 @@ public class ModalDialog extends JDialog {
 		return null;
 	}
 
+    /** Run a fileChooser save dialog, confirm overwrite if applicable, and return File
+     * if successful. */
+	public static File getLoadFile(NuriFrame nuriFrame) {
+		if (fileChooser == null)
+			fileChooser = new JFileChooser();
+		int result = fileChooser.showOpenDialog(nuriFrame);
+		if (result == JFileChooser.APPROVE_OPTION) {
+			File file = fileChooser.getSelectedFile();
+			if (!file.exists()) {
+		        JOptionPane.showMessageDialog(nuriFrame,
+		    			"The file " + file.getAbsolutePath() + " does not exist.",
+		    			"File not found", JOptionPane.ERROR_MESSAGE);
+			} else return file;
+		}
+		// else user canceled the file chooser.
+		return null;
+	}
 }

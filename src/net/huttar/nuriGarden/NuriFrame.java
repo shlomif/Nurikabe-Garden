@@ -121,6 +121,9 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 		// This doesn't work: newButton.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S,
         //  java.awt.Event.CTRL_MASK));
 		
+		makeButton("Load", KeyEvent.VK_L,
+				"Load puzzle from a file", "load");
+
 		makeButton("Save", KeyEvent.VK_A,
 				"Save puzzle to a file", "save");
 
@@ -165,9 +168,9 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
         // TODO: parameterize; or get from a File Open dlg
 		// parser = new NuriParser("samples/huttar_ts.txt");
 		// board = parser.loadFile(9);
-		parser = new NuriParser("samples/janko_ts.txt");
-		board = parser.loadFile(25); // Janko 25: two-digit
-		
+        // For now, start with a new empty board.
+		board = new NuriBoard(5, 5);
+
 		// initial state, debug mode, visualizer
 		solver = new NuriSolver(board, false, vis);
 		// board.setSolver(solver);
@@ -234,6 +237,8 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 	public void actionPerformed(ActionEvent e) {
 		if ("new".equals(e.getActionCommand())) {
 			resetBoard(true);
+        } else if ("load".equals(e.getActionCommand())) {
+        	load();
         } else if ("save".equals(e.getActionCommand())) {
         	save();
 		} else if ("solve".equals(e.getActionCommand())) {
@@ -251,10 +256,25 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
         }
     }
 	
+	/** Select a file via chooser dialog, and load a new board from it. */
+	private void load() {
+		File file = ModalDialog.getLoadFile(this); 
+		if (file != null) {
+			parser = new NuriParser(file.getPath());
+			board = parser.loadFile(9); //TODO: specify id or at least index
+			solver = new NuriSolver(board, false, vis);
+			vis.setSolver(solver);
+			vis.puz = board;
+			vis.redraw();
+	    	solveButton.setEnabled(true);
+		}
+	}
+
 	/** Launch a file-save dialog, and save the current board to a file. */
 	private void save() {
 		if (board == null) return;
-		File file = ModalDialog.getSaveFile(this); // new Dimension(9, 9); // 
+		// TODO: allow saving "current" file w/o having to re-select the file and confirm overwrite. 
+		File file = ModalDialog.getSaveFile(this); 
 		if (file != null) NuriWriter.saveToFile(this, board, file);
 	}
 
