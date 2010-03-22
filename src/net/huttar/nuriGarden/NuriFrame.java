@@ -2,13 +2,15 @@ package net.huttar.nuriGarden;
 
 /**
  * TODO: create a java app built so it can be run w/o Eclipse
+ *   TODO: provide instructions for building from source w/o Eclipse (try on K's computer) 
  * TODO: an "undo" button for edits,
  *   TODO: and for solve steps (manual-only, or also automated?)
  * TODO: vis should show most recent edited cell, when in edit mode
  * DONE CREATING: a way to place numbers. Suggest an editing mode and a solving mode.
  * DONE: "New" switches to editing mode automatically. "Solve" does the reverse.
  * TODO: different cursor to represent editing vs solving mode. Maybe even bg color.
- * TODO: Also provide manual mode switch.
+ * DONE: Also provide manual mode switch.
+ * 	TODO: listen to the mode switch for change of mode
  * DONE: Mouse click places a number: the current number.
  *   DONE: numbers 1-9 set the current number
  *      TODO: (and modifies the last-edited-cell's number if any).
@@ -18,7 +20,7 @@ package net.huttar.nuriGarden;
  * DONE CREATING: provide a way to save.
  * DONE: 1st - to new file (.puz).
  * TODO: 2nd - append to file (.txt format) with id, comment, maybe solution.
- * ##TODO: file open dialog; from whole file (.puz); then can take out hard-wired puzzle load on startup
+ * ##DONE: file open dialog; from whole file (.puz); then can take out hard-wired puzzle load on startup
  *   TODO: load from one-in-file, by ID (.txt) 
  * FIXED: visualizer doesn't show guesses any more! or at least not in color...
  * TODO: Need a way to stop solver, leaving its sure results on the board but
