@@ -1,7 +1,9 @@
 package net.huttar.nuriGarden;
 
 /**
- * TODO: an "undo" button for edits
+ * TODO: create a java app built so it can be run w/o Eclipse
+ * TODO: an "undo" button for edits,
+ *   TODO: and for solve steps (manual-only, or also automated?)
  * TODO: vis should show most recent edited cell, when in edit mode
  * DONE CREATING: a way to place numbers. Suggest an editing mode and a solving mode.
  * DONE: "New" switches to editing mode automatically. "Solve" does the reverse.
@@ -47,6 +49,7 @@ import java.io.File;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -81,6 +84,7 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 
 	private JLabel statusLabel, depthLabel;
 	private JButton solveButton;
+	private JCheckBox editModeCB;
 	private Box buttonPanel;
 	
 	private int currentNumber = 1;
@@ -133,12 +137,17 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 		makeButton("Redraw", KeyEvent.VK_D,
 			"Redraw the puzzle board", "redraw");
 
-		makeButton("Reset Board", KeyEvent.VK_B,
+		makeButton("Reset", KeyEvent.VK_B,
 			"Clear the puzzle back to numbers only", "resetBoard");
 
 		makeButton("Exit", KeyEvent.VK_X,
 			"Exit Nurikabe Garden", "quit");
 
+		editModeCB = new JCheckBox("Edit Mode");
+		editModeCB.setVisible(true);
+		editModeCB.setMnemonic(KeyEvent.VK_E);
+		buttonPanel.add(editModeCB);
+		
         // panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         // panel.setLayout(new GridLayout(5, 4, 5, 5));
 
@@ -314,7 +323,7 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 
 	private void setGardenMode(GardenMode mode) {
 		gardenMode = mode;
-		solveButton.setEnabled(mode == GardenMode.EDIT);
+		editModeCB.setSelected(mode == GardenMode.EDIT);
 	}
 
 	public static void main(String[] args) {
@@ -459,6 +468,9 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 
 	/** Handle mouse click on visualizer at given cell. Mode-dependent. */
 	public void clickedCell(int r, int c, boolean isLeft) {
+		if (board == null ||
+				board.getHeight() <= c || board.getWidth() <= r)
+			return;
 		if (gardenMode == GardenMode.SOLVE) {
 			toggleCellState(r, c, isLeft);
 		} else {
