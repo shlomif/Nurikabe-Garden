@@ -3,9 +3,11 @@
  */
 package net.huttar.nuriGarden;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Stroke;
 
 import javax.swing.JPanel;
 
@@ -55,16 +57,16 @@ public class NuriCanvas extends JPanel {
 		// solver = new NuriSolver("samples/janko_ts.txt", 182, false, this);
 
 		frameRate = 10;
-		bigFont = loadFont("Gentium-40.vlw");
-		smallFont = loadFont("Gentium-24.vlw");
-		currFont = bigFont;
-		textFont(bigFont);
-		textAlign(CENTER);
-		currFontSize = currFont.size; // docs don't say if this is pixels or points
+		//## bigFont = loadFont("Gentium-40.vlw");
+		//## smallFont = loadFont("Gentium-24.vlw");
+		//## currFont = bigFont;
+		//## textFont(bigFont);
+		// textAlign(); // CENTER
+		// currFontSize = currFont.size; // docs don't say if this is pixels or points
 		// System.out.println("Curr font size: " + currFontSize);
 		
 		// use HSB color mode with low-res hue 
-		colorMode(HSB, 30, 100, 100);
+		// colorMode(HSB, 30, 100, 100);
 		// TODO: noLoop(); // draw only on demand, except during solving
 	}
         
@@ -88,7 +90,8 @@ public class NuriCanvas extends JPanel {
 	}
 	
 	//TODO: draw numbers in decimal (2-digit) when > 9
-    void drawGrid(NuriBoard puz) {
+    void drawGrid(NuriBoard puz, Graphics g) {
+        Graphics2D g2d = (Graphics2D) g;
 		// System.out.println("In drawGrid() at " + System.currentTimeMillis()); // debugging
     	//TODO: probably need to add synchronization or sthg to make sure the board object doesn't disappear on us
     	// while we're accessing it.
@@ -98,6 +101,8 @@ public class NuriCanvas extends JPanel {
     	// Make cells square.
     	cellW = Math.min(cellW, cellH);
     	cellH = cellW;
+        Stroke thin = new Stroke(1);
+        Stroke thick = Stroke.? cellW / 10.0f;
     	decideFont(cellW);
     	int cw2 = cellW / 2;
     	int numberHeight = cw2 + currFontSize * 7 / 24; // This approximation seems to work well.
@@ -105,34 +110,36 @@ public class NuriCanvas extends JPanel {
     		bottom = puz.getHeight() * cellH;
     	int i, j;
 
-    	background(0, 0, 75); // light gray
+    	// background(0, 0, 75); // light gray
+    	
     	
     	pushMatrix();
     	translate(margin, margin);
 
-    	stroke(0, 0, 40); // medium gray
-        strokeWeight(1);
+    	g2d.setColor(Color.gray); // stroke(0, 0, 40); // medium gray
+        //## strokeWeight(1);
 
-        drawLines(cellW, cellH, top, left, right, bottom);
+        drawLines(cellW, cellH, top, left, right, bottom, g2d);
 
         // draw shadow lines for etched look?
         if (cellW >= prefCellSize) {
 	        pushMatrix();
-	        stroke(0, 0, 90); // light gray
+	        g2d.setColor(Color.lightGray); // light gray
 	    	translate(1, 1);
-	        drawLines(cellW, cellH, top, left, right, bottom);
+	        drawLines(cellW, cellH, top, left, right, bottom, g2d);
 	        popMatrix();
         }
         
-        noStroke();
+        //noStroke();
         for (i = 0; i < puz.getHeight(); i++) {
         	for (j = 0; j < puz.getWidth(); j++) {
         		char c = puz.get(i, j);
         		short gl = puz.getGuessLevel(i, j);
         		int x = j * cellW + 1, y = i * cellH + 1;
+                // color = g.getHSBColor( ...);
         		if (c == NuriBoard.BLACK) {
         			setFill(gl, NuriBoard.BLACK);
-    				rect(x, y, cellW - 1, cellH - 1);
+    				g.fillRect(x, y, cellW - 1, cellH - 1);
         		} else if (NuriBoard.isWhite(c)) {
         			setFill(gl, NuriBoard.WHITE);
 					rect(x, y, cellW - 1, cellH - 1);
@@ -145,9 +152,8 @@ public class NuriCanvas extends JPanel {
         }
         
         if (solver != null && solver.lastChangedCell != null) {
-	        stroke((float) 5.1, 85, 100); // yellow
-	        noFill();
-	        strokeWeight((float) (cellW * 0.1));
+	        g2d.setColor(Color.yellow); // yellow, (float) 5.1, 85, 100
+	        g2d.setStroke();// strokeWeight((float) (cellW * 0.1));
 	        i = solver.lastChangedCell.getRow();
 	        j = solver.lastChangedCell.getColumn();
 	        rect(cellW * j, cellH * i, cellW, cellH);
@@ -157,11 +163,11 @@ public class NuriCanvas extends JPanel {
     }
 
     private void drawLines(int cellW, int cellH, int top, int left, int right,
-			int bottom) {
+			int bottom, Graphics2D g2d) {
         for (int i = 0; i <= puz.getHeight(); i++)
-        	line(left, i * cellH, right, i * cellH);
+        	g2d.drawLine(left, i * cellH, right, i * cellH);
         for (int j = 0; j <= puz.getWidth(); j++)
-        	line(j * cellW, top, j * cellW, bottom);
+        	g2d.drawLine(j * cellW, top, j * cellW, bottom);
 	}
 
 	/** Draw digits on grid. 
@@ -182,12 +188,12 @@ public class NuriCanvas extends JPanel {
      * @param guessLevel
      * @param value
      */
-    private void setFill(short guessLevel, char value) {
+    private void setFill(short guessLevel, char value, Graphics2D g2d) {
     	if (guessLevel == 0)
-    		fill(0, 0, (value == NuriBoard.BLACK) ? 0 : 100);
+    		g2d.setColor(value == NuriBoard.BLACK ? Color.black : Color.white);
     	else
-    		fill(guessLevel, 40,
-    				(value == NuriBoard.BLACK) ? 40 : 100);
+    		g2d.setColor(Color.getHSBColor(guessLevel / 30.0f, 0.4f,
+    				(value == NuriBoard.BLACK) ? 0.4f : 1.0f));
     }
     
 	public void mousePressed() {
@@ -217,7 +223,7 @@ public class NuriCanvas extends JPanel {
 			if (puz == null)				
 				setSizeToBoard(solver.latestBoard);
 			puz = solver.latestBoard;
-			drawGrid(puz);
+			drawGrid(puz, g);
 			frame.updateStatus();
 		}
 	}
