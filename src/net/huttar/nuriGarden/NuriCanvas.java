@@ -239,7 +239,8 @@ public class NuriCanvas extends JPanel implements MouseListener {
 		// we don't care about this event.		
 	}
 
-	public void mousePressed(MouseEvent e) { //##TODO: register event handler
+	public void mousePressed(MouseEvent e) {
+		//##FIXME: r seems to be off by one 
 		// get cell where the click occurred
 		int c = (e.getX() - margin) / cellW;
 		int r = (e.getY() - margin) / cellH;
