@@ -9,6 +9,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.geom.AffineTransform;
 
 import javax.swing.JPanel;
@@ -19,7 +20,7 @@ import processing.core.PFont;
  * Draw board and solver state.
  * TODO: develop this to replace NuriVisualizer.
  */
-public class NuriCanvas extends JPanel {
+public class NuriCanvas extends JPanel implements MouseListener {
 	
 	/**
 	 * 
@@ -40,12 +41,13 @@ public class NuriCanvas extends JPanel {
 	NuriBoard puz = null;
 	NuriSolver solver = null;
 	
-	
-	public NuriCanvas(NuriBoard board, NuriSolver s) {
+	public NuriCanvas(NuriBoard board, NuriSolver s, NuriFrame f) {
 		super(); // redundant?
 		puz = board;
 		solver = s;
 		thinStroke = new BasicStroke();
+		frame = f;
+		f.addMouseListener(this);
 	}
 
 	public void setup() {
@@ -198,19 +200,6 @@ public class NuriCanvas extends JPanel {
     				(value == NuriBoard.BLACK) ? 0.4f : 1.0f));
     }
     
-	public void mousePressed(MouseEvent e) { //##TODO: register event handler
-		// get cell where the click occurred
-		int c = (e.getX() - margin) / cellW;
-		int r = (e.getY() - margin) / cellH;
-		// System.out.println("Mouse clicked in cell: " + c + ", " + r);
-		//##TODO: frame.clickedCell(r, c, (mouseButton == LEFT));
-	}
-	
-	//TODO: detect keys in the frame, not in the visualizer
-	public void keyPressed() {
-		//frame.keyPressed(key); ##TODO: register event handler
-	}
-
 	void setSolver(NuriSolver s) {
 		solver = s;		
 	}
@@ -229,4 +218,34 @@ public class NuriCanvas extends JPanel {
 			frame.updateStatus();
 		}
 	}
+
+	@Override
+	public void mouseClicked(MouseEvent arg0) {
+		// we don't care about this event.
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		// we don't care about this event.		
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+		// we don't care about this event.
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		// we don't care about this event.		
+	}
+
+	public void mousePressed(MouseEvent e) { //##TODO: register event handler
+		// get cell where the click occurred
+		int c = (e.getX() - margin) / cellW;
+		int r = (e.getY() - margin) / cellH;
+		// System.out.println("Mouse clicked in cell: " + c + ", " + r);
+		frame.clickedCell(r, c, (e.getButton() == MouseEvent.BUTTON1));
+		
+	}
+	
 }

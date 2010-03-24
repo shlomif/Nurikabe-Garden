@@ -46,6 +46,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.File;
 
 import javax.swing.Box;
@@ -186,7 +188,7 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 		
         // For embedding Processing applet see
         // http://dev.processing.org/reference/core/javadoc/processing/core/PApplet.html
-        vis = new NuriCanvas(board, solver);
+        vis = new NuriCanvas(board, solver, this);
         vis.frame = this;
         // AWT: add(vis, BorderLayout.CENTER);
         panel.add(vis);
@@ -508,5 +510,11 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 			vis.repaint();
 		}
 	}
+
+	//TODO: detect keys in the frame, not in the visualizer
+	public void keyPressed() {
+		//frame.keyPressed(key); ##TODO: register event handler
+	}
+
 
 }
