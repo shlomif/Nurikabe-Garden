@@ -3,11 +3,13 @@
  */
 package net.huttar.nuriGarden;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Stroke;
+import java.awt.event.MouseEvent;
+import java.awt.geom.AffineTransform;
 
 import javax.swing.JPanel;
 
@@ -32,7 +34,7 @@ public class NuriCanvas extends JPanel {
 	private final int prefCellSize = smallFontSize;
 	private int cellW = prefCellSize, cellH = prefCellSize;
 
-	private int frameRate = 10;
+	private int frameRate = 10; //## Do something with this.
 	
 	NuriFrame frame = null;
 	NuriBoard puz = null;
@@ -43,6 +45,7 @@ public class NuriCanvas extends JPanel {
 		super(); // redundant?
 		puz = board;
 		solver = s;
+		thinStroke = new BasicStroke();
 	}
 
 	public void setup() {
@@ -80,29 +83,30 @@ public class NuriCanvas extends JPanel {
 	void decideFont(int cellSize) {
 		if (cellSize < (bigFontSize * 1.2) && currFont != smallFont) {
 			currFont = smallFont;
-			textFont(smallFont);
+			//##textFont(smallFont);
 			currFontSize = smallFontSize;
 		} else if (cellSize >= (bigFontSize * 1.2) && currFont != bigFont){
 			currFont = bigFont;
-			textFont(bigFont);
+			//##textFont(bigFont);
 			currFontSize = bigFontSize;
 		}
 	}
-	
+
+	private BasicStroke thinStroke = null;
+    private BasicStroke thickStroke = null;
+
 	//TODO: draw numbers in decimal (2-digit) when > 9
-    void drawGrid(NuriBoard puz, Graphics g) {
-        Graphics2D g2d = (Graphics2D) g;
+    void drawGrid(NuriBoard puz, Graphics2D g2d) {
 		// System.out.println("In drawGrid() at " + System.currentTimeMillis()); // debugging
     	//TODO: probably need to add synchronization or sthg to make sure the board object doesn't disappear on us
     	// while we're accessing it.
     	int left = 0, top = 0, margin = 10;
-    	cellW = (width - margin * 2) / puz.getWidth();
-    	cellH = (height - margin * 2) / puz.getHeight();
+    	cellW = (getWidth() - margin * 2) / puz.getWidth();
+    	cellH = (getHeight() - margin * 2) / puz.getHeight();
     	// Make cells square.
     	cellW = Math.min(cellW, cellH);
     	cellH = cellW;
-        Stroke thin = new Stroke(1);
-        Stroke thick = Stroke.? cellW / 10.0f;
+    	thickStroke = new BasicStroke(cellW / 10.0f);
     	decideFont(cellW);
     	int cw2 = cellW / 2;
     	int numberHeight = cw2 + currFontSize * 7 / 24; // This approximation seems to work well.
@@ -113,21 +117,19 @@ public class NuriCanvas extends JPanel {
     	// background(0, 0, 75); // light gray
     	
     	
-    	pushMatrix();
-    	translate(margin, margin);
-
+    	AffineTransform saveXform = g2d.getTransform(); // pushMatrix();
+    	g2d.translate(margin, margin);
     	g2d.setColor(Color.gray); // stroke(0, 0, 40); // medium gray
-        //## strokeWeight(1);
+        g2d.setStroke(thinStroke); // strokeWeight(1);
 
         drawLines(cellW, cellH, top, left, right, bottom, g2d);
 
         // draw shadow lines for etched look?
         if (cellW >= prefCellSize) {
-	        pushMatrix();
 	        g2d.setColor(Color.lightGray); // light gray
-	    	translate(1, 1);
+	    	g2d.translate(1, 1);
 	        drawLines(cellW, cellH, top, left, right, bottom, g2d);
-	        popMatrix();
+	        g2d.translate(-1, -1); // popMatrix();
         }
         
         //noStroke();
@@ -138,13 +140,13 @@ public class NuriCanvas extends JPanel {
         		int x = j * cellW + 1, y = i * cellH + 1;
                 // color = g.getHSBColor( ...);
         		if (c == NuriBoard.BLACK) {
-        			setFill(gl, NuriBoard.BLACK);
-    				g.fillRect(x, y, cellW - 1, cellH - 1);
+        			setFill(gl, NuriBoard.BLACK, g2d);
+    				g2d.fillRect(x, y, cellW - 1, cellH - 1);
         		} else if (NuriBoard.isWhite(c)) {
-        			setFill(gl, NuriBoard.WHITE);
-					rect(x, y, cellW - 1, cellH - 1);
+        			setFill(gl, NuriBoard.WHITE, g2d);
+					g2d.fillRect(x, y, cellW - 1, cellH - 1);
 					if (NuriBoard.isANumber(c)) {
-						drawNumber(c, x + cw2, y + numberHeight);
+						drawNumber(c, x + cw2, y + numberHeight, g2d);
 						// text(c, x + cw2, y + numberHeight);
 					}
         		}
@@ -153,13 +155,13 @@ public class NuriCanvas extends JPanel {
         
         if (solver != null && solver.lastChangedCell != null) {
 	        g2d.setColor(Color.yellow); // yellow, (float) 5.1, 85, 100
-	        g2d.setStroke();// strokeWeight((float) (cellW * 0.1));
+	        g2d.setStroke(thickStroke);// strokeWeight((float) (cellW * 0.1));
 	        i = solver.lastChangedCell.getRow();
 	        j = solver.lastChangedCell.getColumn();
-	        rect(cellW * j, cellH * i, cellW, cellH);
+	        g2d.drawRect(cellW * j, cellH * i, cellW, cellH);
         }
         
-    	popMatrix();
+        g2d.setTransform(saveXform); // popMatrix();
     }
 
     private void drawLines(int cellW, int cellH, int top, int left, int right,
@@ -173,14 +175,14 @@ public class NuriCanvas extends JPanel {
 	/** Draw digits on grid. 
      * c is character representation of digit.
      * Nudge left if 2-digit number. */
-    private void drawNumber(char c, int x, int y) {
+    private void drawNumber(char c, int x, int y, Graphics2D g2d) {
     	int d = NuriBoard.numberValue(c);
     	assert(d < 100); // The parser can't give us numbers > 99.
-		fill(0, 0, 0);  // black
+		g2d.setColor(Color.black);
     	if (d < 10)
-    		text(c, x, y);
+    		g2d.drawString(Character.toString(c), x, y);
     	else
-    		text(Integer.toString(d), x - currFontSize / 20, y);
+    		g2d.drawString(Integer.toString(d), x - currFontSize / 20, y);
 	}
 
 	/** Set fill color for square based on guessLevel
@@ -196,17 +198,17 @@ public class NuriCanvas extends JPanel {
     				(value == NuriBoard.BLACK) ? 0.4f : 1.0f));
     }
     
-	public void mousePressed() {
+	public void mousePressed(MouseEvent e) { //##TODO: register event handler
 		// get cell where the click occurred
-		int c = (mouseX - margin) / cellW;
-		int r = (mouseY - margin) / cellH;
+		int c = (e.getX() - margin) / cellW;
+		int r = (e.getY() - margin) / cellH;
 		// System.out.println("Mouse clicked in cell: " + c + ", " + r);
-		frame.clickedCell(r, c, (mouseButton == LEFT));
+		//##TODO: frame.clickedCell(r, c, (mouseButton == LEFT));
 	}
 	
 	//TODO: detect keys in the frame, not in the visualizer
 	public void keyPressed() {
-		frame.keyPressed(key);
+		//frame.keyPressed(key); ##TODO: register event handler
 	}
 
 	void setSolver(NuriSolver s) {
@@ -223,7 +225,7 @@ public class NuriCanvas extends JPanel {
 			if (puz == null)				
 				setSizeToBoard(solver.latestBoard);
 			puz = solver.latestBoard;
-			drawGrid(puz, g);
+			drawGrid(puz, g2d);
 			frame.updateStatus();
 		}
 	}
