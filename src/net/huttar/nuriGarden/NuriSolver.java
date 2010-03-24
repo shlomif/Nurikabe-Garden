@@ -52,7 +52,7 @@ class NuriSolver extends Thread  {
 
 	volatile NuriBoard latestBoard = null; //B
 	
-	private NuriVisualizer visualizer = null; //B (or A)
+	private NuriCanvas visualizer = null; //B (or A)
 
 	private short stepStopDepth = -1;
 
@@ -85,7 +85,7 @@ class NuriSolver extends Thread  {
 
 	/** Read specified puzzle from the given file. */
 	NuriSolver(NuriBoard board,
-			boolean debugMode, NuriVisualizer vis) {
+			boolean debugMode, NuriCanvas vis) {
 		NuriSolver.debugMode = debugMode;
 		this.visualizer = vis;
 
@@ -676,7 +676,7 @@ class NuriSolver extends Thread  {
 		stepStopDepth = (short)(searchDepth() + i);
 	}
 
-	void setVisualizer(NuriVisualizer vis) {
+	void setVisualizer(NuriCanvas vis) {
 		visualizer = vis;
 	}
 

@@ -62,9 +62,7 @@ import javax.swing.JMenuBar;
 import net.huttar.nuriGarden.NuriSolver.StopMode;
 
 /** 
- * Frame for Nurikabe Garden. Using AWT because Processing (NuriVisualizer)
- * uses AWT, and I don't think we need anything more (Swing, AWT) for now.
- * 
+ * Frame for Nurikabe Garden.
  * @author huttarl
  *
  */
@@ -82,7 +80,7 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 	private NuriParser parser = null;
 	private NuriSolver solver = null;
 	private NuriBoard board = null;
-	private NuriVisualizer vis = null;
+	private NuriCanvas vis = null;
 
 	private JLabel statusLabel, depthLabel;
 	private JButton solveButton;
@@ -188,7 +186,7 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 		
         // For embedding Processing applet see
         // http://dev.processing.org/reference/core/javadoc/processing/core/PApplet.html
-        vis = new NuriVisualizer(board, solver);
+        vis = new NuriCanvas(board, solver);
         vis.frame = this;
         // AWT: add(vis, BorderLayout.CENTER);
         panel.add(vis);
@@ -209,9 +207,9 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
         // important to call this whenever embedding a PApplet.
         // It ensures that the animation thread is started and
         // that other internal variables are properly set.
-        vis.init();
+        //vis.init();
 		vis.setSizeToBoard(board);
-        vis.redraw();
+        vis.repaint();
 	}
 	
 	private JButton makeButton(String label, int mnem, String toolTip,
@@ -255,9 +253,9 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 		} else if ("solve".equals(e.getActionCommand())) {
         	solver.maybeStart();
         	setGardenMode(GardenMode.SOLVE);
-        	vis.loop();
+        	//##TODO: vis.loop();
         } else if ("redraw".equals(e.getActionCommand())) {
-        	vis.redraw();
+        	vis.repaint();
         } else if ("quit".equals(e.getActionCommand())) {
         	quit();
         } else if ("resetBoard".equals(e.getActionCommand())) {
@@ -276,7 +274,7 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 			solver = new NuriSolver(board, false, vis);
 			vis.setSolver(solver);
 			vis.puz = board;
-			vis.redraw();
+			vis.repaint();
 	    	solveButton.setEnabled(true);
 		}
 	}
@@ -305,7 +303,7 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 		synchronized(this) {
 			solver.threadSuspended = true;
 			solver.stopMode = NuriSolver.StopMode.EXIT;
-			vis.noLoop();
+			//##TODO: vis.noLoop();
 	    	solver = null;
 	    	vis.setSolver(null);
 	    	if (isNew) {
@@ -316,7 +314,7 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 			solver = new NuriSolver(board, false, vis);
 			vis.setSolver(solver);
 			vis.puz = board;
-			vis.redraw();
+			vis.repaint();
 	    	solveButton.setEnabled(true);
 		}
 		statusLabel.setText("Board cleared.");
@@ -342,11 +340,11 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
     public void componentMoved(ComponentEvent e) { }
 
     public void componentResized(ComponentEvent e) {
-    	if (vis != null) vis.redraw();    	
+    	if (vis != null) vis.repaint();    	
     }
 
     public void componentShown(ComponentEvent e) {
-    	if (vis != null) vis.redraw();
+    	if (vis != null) vis.repaint();
 	}
 
 
@@ -494,7 +492,7 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 		//DONE: reset solver completely.
 		solver = new NuriSolver(board, false, vis);
 		vis.setSolver(solver);
-		vis.redraw();
+		vis.repaint();
 	}
 
 	private void toggleCellState(int r, int c, boolean isLeft) {
@@ -507,7 +505,7 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 			// update regions accordingly
 			// TODO: could optimize the following; it's kind of overkill.
 			board.prepareStats(false);
-			vis.redraw();
+			vis.repaint();
 		}
 	}
 
