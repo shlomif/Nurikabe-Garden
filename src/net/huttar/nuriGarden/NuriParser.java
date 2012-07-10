@@ -27,12 +27,12 @@ class NuriParser {
 		filename = fn;
 	}
 
-	NuriBoard loadFile(int i) {
+	NuriBoard loadFile(int puzzleIndex) {
 		NuriBoard puz = new NuriBoard();
 		if (filename.endsWith(".puz"))
 			loadPuz(puz, filename);
 		else
-			loadTxt(puz, filename, i);	
+			loadTxt(puz, filename, puzzleIndex);	
 
 		return puz;
 	}
@@ -70,7 +70,7 @@ class NuriParser {
 		 */
 		
 		/** Load i-th puzzle from filename (1-based indexing). */ 
-		void loadTxt(NuriBoard puz, String filename, int i) {
+		void loadTxt(NuriBoard puz, String filename, int puzzleIndex) {
 			try {
 				Scanner in = new Scanner(new FileInputStream(filename));
 				// ArrayList<String> lines = new ArrayList<String>();
@@ -116,7 +116,7 @@ class NuriParser {
 				Pattern rePuzData = Pattern.compile("\"([^\"]+)\",(\\d+),(\\d+),\"([^\"]+)\"(,\"([^\"]+)\")?(\\s*;(.*))?");
 				String tmp;
 				
-				for (int curPuz = 1; curPuz <= i; curPuz++) {
+				for (int curPuz = 1; curPuz <= puzzleIndex; curPuz++) {
 					do {
 						tmp = in.findInLine(rePuzData);
 						// skip blank or comment-only lines
