@@ -95,14 +95,27 @@ class NuriSolver extends Thread  {
 	/** Read the specified puzzle, solve it, and verify the solution. */
 	/** Usage: java ClassName [-d] filename (minus ".puz") */
 	public static void main(String[] args) {
-		int fileArg = 0;
+		int argIndex = 0;
 
-		if (args[0].equals("-d")) { debugMode = true; fileArg++; }
-		// if (args[fileArg].equals("-b")) {
-		//   fileArg++;
+		if (argIndex >= args.length) {
+			System.err.println("NuriSolver requires a command-line argument");
+			System.exit(-1);
+		}
+		if (args[argIndex].equals("-d")) {
+			debugMode = true;
+			argIndex++;
+		}
+		// if (args[argIndex].equals("-b")) {
+		//   argIndex++;
 		//   TODO: process batch of puzzles
 		// }
 
+		if (argIndex >= args.length) {
+			System.err.println("NuriSolver requires a file parameter");
+			System.exit(-1);
+		}
+
+		int fileArg = argIndex;
 		NuriParser parser = new NuriParser(args[fileArg].indexOf('.') > -1 ?
 				args[fileArg] : args[fileArg] + ".puz");
 		NuriBoard board = parser.loadFile(182);
