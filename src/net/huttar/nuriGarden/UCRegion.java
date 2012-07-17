@@ -11,7 +11,7 @@ package net.huttar.nuriGarden;
  */
 class UCRegion extends Region implements Cloneable {
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 4152740641552650062L;
 
@@ -22,7 +22,7 @@ class UCRegion extends Region implements Cloneable {
 	/** Number of cells this ucRegion can hold. If zero, limit is unknown. */
 	private int limit = 0;
 	short r = 255, g = 255, b = 255; // color, for visualization
-	
+
 	/** Return number of cells this ucRegion can hold. If zero, limit is unknown. */
 	int getLimit() {
 		return limit;
@@ -33,7 +33,7 @@ class UCRegion extends Region implements Cloneable {
 	Coords getNumberedCell() {
 		return numberedCell;
 	}
-	
+
 	/** Return content type of this ucRegion. */
 	char getContentType() {
 		return contentType;
@@ -43,12 +43,12 @@ class UCRegion extends Region implements Cloneable {
 	boolean isHungry() {
 		return limit == 0 || size() < limit;
 	}
-	
+
 	/** Return number of cells this region wants (-1 if unknown) */
 	int getHunger() {
 		return (limit == 0) ? -1 : (limit - size());
 	}
-	
+
 	/** Create an empty UCRegion that can only hold cells of
 	 * the given content type.
 	 */
@@ -68,12 +68,12 @@ class UCRegion extends Region implements Cloneable {
 
 	/** Create a UCRegion in puzzle consisting of cell. The region's contentType
 	 * is determined by the contents of cell.
-	 */ 
+	 */
 	UCRegion(NuriBoard puzzle, Coords cell) {
 		super(puzzle);
 		char content = puzzle.get(cell);
 		contentType = NuriBoard.isANumber(content) ? NuriBoard.WHITE : content;
-		
+
 		if (contentType == NuriBoard.BLACK) {
 			limit = puzzle.getExpBlackCount();
 		} else if (NuriBoard.isANumber(content)) {
@@ -82,7 +82,7 @@ class UCRegion extends Region implements Cloneable {
 		}
 		add(cell);
 	}
-	
+
 	/** Add given cell to this region and perform consistency checks.
 	 * If set is true, set the given cell to the appropriate value. */
 	boolean addCell(Coords cell, boolean set) throws ContradictionException {
@@ -105,12 +105,12 @@ class UCRegion extends Region implements Cloneable {
 		return super.add(cell);
 	}
 
-	/** Add given cell to this region and perform consistency checks. 
+	/** Add given cell to this region and perform consistency checks.
 	 * Cell content is assumed to be of the right type for this UCRegion. */
 	boolean addCell(Coords cell) throws ContradictionException {
 		return addCell(cell, false);
 	}
-	
+
 	/** Add all cells of given region to this region, performing consistency checks. */
 	boolean addAllCells(UCRegion newRegion) throws ContradictionException {
 		if (!this.isHungry() || !newRegion.isHungry())
@@ -130,7 +130,7 @@ class UCRegion extends Region implements Cloneable {
 		this.limit = (this.limit == 0) ? newRegion.limit : this.limit;
 		return super.addAll(newRegion);
 	}
-	
+
 	public String toString() {
 		StringBuilder result = new StringBuilder();
 		result.append("UCRegion (type " + contentType + ", limit " + limit + "): ");
@@ -144,10 +144,10 @@ class UCRegion extends Region implements Cloneable {
 	public Object clone() {
 		return super.clone();
 	}
-	
+
 	/** Set puzzle context (after cloning). */
 	void setState(NuriBoard puzzle) {
 		this.puzzle = puzzle;
 	}
-	
+
 }

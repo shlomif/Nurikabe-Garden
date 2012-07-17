@@ -1,6 +1,6 @@
 /** TODO: should be able to optimize by putting in some simple
  * specific cases, which are quicker to check, before the
- * more general cases that take longer to compute. 
+ * more general cases that take longer to compute.
  ** TODO: add profiling: in each rule method, record:
  * - count of calls
  * - duration of call
@@ -25,17 +25,17 @@ class NuriSolver extends Thread  {
 	// For explanation of comments below of the form //A or B or C, see notes.txt
 
 	enum StopMode { ONESTEP, STEPIN, STEPOVER, STEPOUT, CONTINUE, RESTART, EXIT };
-	
+
 	// Indicates when the solver should stop (suspend thread).
 	// If solver is already suspended, this takes effect next time it is running.
 	volatile StopMode stopMode = StopMode.CONTINUE; //B (or A)
 
 	/** Tells thread when to pause. */
 	volatile boolean threadSuspended = false; //B (or A)
-	
+
 	/** Whether to output debug messages. */
 	private static boolean debugMode = false; //A
-	
+
 	/** Time the solving process started/ended. */
 	private long startTime = 0; //B
 	private long endTime = 0; //B
@@ -43,25 +43,25 @@ class NuriSolver extends Thread  {
 	/** The last rule that was used for an inference. */
 	volatile String lastRule; //B (strictly should be C, but for our purposes,
 	// B is fine. If we need the accuracy, we could set it on return from recursion.)
-	
+
 	/** Coordinates of the last cell changed... for display purposes. */
 	volatile Coords lastChangedCell = null; //B
-	
+
 	/** State of board we're solving. */
 	private NuriBoard topBoard = null; //C
 
 	volatile NuriBoard latestBoard = null; //B
-	
+
 	private NuriCanvas visualizer = null; //B (or A)
 
 	private short stepStopDepth = -1;
 
 	// boolean success = false; //B if needed (not currently)
-	
+
 	/** "Rule" label for guesses. */
 	//TODO: check, is this actually useful?
 	private static final String hypothesisLabel = "[guess]"; //A
-	
+
 	/** Max depth of recursive search. */
 	private int maxSearchDepth = 0; //B
 
@@ -72,7 +72,7 @@ class NuriSolver extends Thread  {
 		else
 			return 0;
 	}
-	
+
 	/** Number of hypotheses tried through all instances of this class. */
 	private int totalHypotheses = 0; //B
 
@@ -122,7 +122,7 @@ class NuriSolver extends Thread  {
 
 		NuriSolver solver = new NuriSolver(board, true, null);
 		// board.setSolver(solver);
-				
+
 		System.out.println(solver.topBoard);
 
 		solver.solveWrapper();
@@ -131,7 +131,7 @@ class NuriSolver extends Thread  {
 	/** Start solver thread only if not already started. */
 	public void maybeStart() {
 		if (getState() == Thread.State.NEW)
-			start();		
+			start();
 	}
 
 	// How to run as a thread.
@@ -147,15 +147,15 @@ class NuriSolver extends Thread  {
 			success = solve(topBoard);
         } catch (ContradictionException e) {
 			System.out.println("Contradiction: " + e.toString()
-					+ "\nThis puzzle is inconsistent.");        	
+					+ "\nThis puzzle is inconsistent.");
         }
-        
-        endSolve(success);	
+
+        endSolve(success);
         return success;
 	}
-	
+
 	void startSolve() {
-		startTime = System.currentTimeMillis();		
+		startTime = System.currentTimeMillis();
 	}
 
 	void endSolve(boolean success) {
@@ -164,7 +164,7 @@ class NuriSolver extends Thread  {
 			System.out.println("Successfully solved puzzle in " + (endTime - startTime)
 					+ " ms with " + totalInferences
 					+ " inferences and " + totalHypotheses +
-					" guesses at a max search depth of " + maxSearchDepth);			
+					" guesses at a max search depth of " + maxSearchDepth);
 			// System.out.println("Correct? " + checkSolution(args[fileArg])); TODO: implement this
 		} else {
 			System.out.println("Unable to solve puzzle. I got this far:");
@@ -215,10 +215,10 @@ class NuriSolver extends Thread  {
 	boolean solve(NuriBoard board) throws ContradictionException {
 		board.changed = true;
 		board.validityKnown = false;
-		
+
 		if (maxSearchDepth < board.searchDepth) maxSearchDepth = board.searchDepth;
 		showProgress(board);
-		
+
 		/*
 		 * Try rules and search until puzzle is solved, or until they don't
 		 * help.
@@ -231,7 +231,7 @@ class NuriSolver extends Thread  {
 			while (!board.isSolved() && board.changed) {
 				// check for any constraint violations to catch them early and prune.
 				board.checkConstraints();
-				
+
 				board.changed = false;
 				try {
 					applyProductionRules(board);
@@ -260,7 +260,7 @@ class NuriSolver extends Thread  {
 
 		return board.isSolved();
 	}
-	
+
 	/** Infer that the given cell holds the given value.
 	 * Call set() and issue a debugging message. */
 	protected void infer(NuriBoard board, Coords cell, char value, String rule)
@@ -279,20 +279,20 @@ class NuriSolver extends Thread  {
 		//TODO: fix these booleans regarding stepping in, out
 		checkControls(false, false);	// obey execution controls
 	}
-	
+
 	/** Put the given value in the given cell and recursively try to solve the puzzle.
-	 * Return true if successful. */ 
+	 * Return true if successful. */
 	private boolean trySearch(NuriBoard board, Coords cell, char value, boolean isSure) {
 		totalHypotheses++;
 		showProgress(board);
-		
+
 		// Save state
 		NuriBoard trialBoard = (NuriBoard)board.clone();
 		latestBoard = trialBoard;
 		trialBoard.isSure = (isSure ? board.isSure : false);
 		trialBoard.predecessor = board;
 		trialBoard.searchDepth = (short)(board.searchDepth + 1);
-		
+
 		String hypoth = "Hypothesis " + cell + " = '" + value + "'";
 		try {
 			debugMsg(searchDepth(), "Trying " + hypoth + "...");
@@ -309,7 +309,7 @@ class NuriSolver extends Thread  {
 				for (UCRegion region : board.blackRegions)
 					region.setState(board);
 				for (UCRegion region : board.whiteRegions)
-					region.setState(board);				
+					region.setState(board);
 			}
 			return result;
 		}
@@ -343,12 +343,12 @@ class NuriSolver extends Thread  {
 	/**
 	 * Production rule 0: if a cell is too far from any numbered cell
 	 * to be part of its region, that cell must be black.
-	 * 
+	 *
 	 * @throws ContradictionException
 	 */
 	private void rule0(NuriBoard board) throws ContradictionException {
 		if (ranRule0) return; else ranRule0 = true;
-		
+
 		outer:
 		for (Coords cell : board) {
 			if (NuriBoard.isANumber(board.get(cell))) continue;
@@ -364,7 +364,7 @@ class NuriSolver extends Thread  {
 	/**
 	 * Production rule 1: if a white region is full, all its immediate neighbors
 	 * must be black.
-	 * 
+	 *
 	 * @throws ContradictionException
 	 */
 	private void rule1(NuriBoard board) throws ContradictionException {
@@ -392,7 +392,7 @@ class NuriSolver extends Thread  {
 	/**
 	 * Production rule 2: If an unknown cell has at least two white neighbors that belong to
 	 * different regions that both contain numbers, the unknown cell must be black.
-	 * 
+	 *
 	 * @throws ContradictionException
 	 */
 	private void rule2(NuriBoard board) throws ContradictionException {
@@ -401,25 +401,25 @@ class NuriSolver extends Thread  {
 			UCRegion reg1 = null, reg2 = null;
 			// TODO Enhancement: compare each neighboring numbered white region
 			// to every neighboring unnumbered white region, because some unnumbered regions
-			// could be too big to unify with 
-			// 
+			// could be too big to unify with
+			//
 			for (Coords neighbor : board.neighbors(cell)) {
 				if (NuriBoard.isWhite(board.get(neighbor))) {
-					// Haven't yet found a neighboring region with a number? 
+					// Haven't yet found a neighboring region with a number?
 					if (reg1 == null) {
 						reg1 = board.containingRegion(neighbor);
 						assert(reg1 != null): "Uh oh, white cell not in a region: " + neighbor;
 						assert(!reg1.isHungry()): "A full white region at " + neighbor +
-							" has neighbor not known to be black, at " + cell; 
+							" has neighbor not known to be black, at " + cell;
 						// Only regions containing numbers matter.
-						if (reg1.getLimit() == 0) reg1 = null;												
+						if (reg1.getLimit() == 0) reg1 = null;
 					} else {
 						// This is potentially the second neighboring numbered region.
 						reg2 = board.containingRegion(neighbor);
 						if (reg2 == reg1) continue;
 						assert(reg2 != null): "Uh oh, white cell not in a region: " + neighbor;
 						assert(!reg2.isHungry()): "A full white region at " + neighbor +
-							" has neighbor not known to be black, at " + cell; 
+							" has neighbor not known to be black, at " + cell;
 						// Only regions containing numbers matter.
 						if (reg2.getLimit() == 0) reg2 = null;
 						else {
@@ -438,7 +438,7 @@ class NuriSolver extends Thread  {
 	 * Otherwise, if the hungry region only wants one more cell, and there are exactly two candidates,
 	 * which are diagonal from each other, the square adjacent to both candidates that is not part
 	 * of the hungry region must be the opposite color.
-	 * 
+	 *
 	 * @throws ContradictionException
 	 */
 	private void rule3(NuriBoard board) throws ContradictionException {
@@ -463,8 +463,8 @@ class NuriSolver extends Thread  {
 	 * of the hungry region must be the opposite color.
 	 * Or, if the hungry region is white and and there are exactly two candidates,
 	 * which are diagonal from each other, and the square adjacent to both candidates that is not part
-	 * of the hungry white region is adjacent to another (hungry) white region, that square must be black.  
-	 * 
+	 * of the hungry white region is adjacent to another (hungry) white region, that square must be black.
+	 *
 	 * @throws ContradictionException
 	 */
 	private void rule3a(NuriBoard board, UCRegion region) throws ContradictionException {
@@ -488,8 +488,8 @@ class NuriSolver extends Thread  {
 			int hunger = region.getLimit() - region.size();
 			// ... and if candidates are caddy-corner...
 			Object nb[] = neighbors.toArray();
-			int r0 = ((Coords)nb[0]).getRow(), r1 = ((Coords)nb[1]).getRow();  
-			int c0 = ((Coords)nb[0]).getColumn(), c1 = ((Coords)nb[1]).getColumn();  
+			int r0 = ((Coords)nb[0]).getRow(), r1 = ((Coords)nb[1]).getRow();
+			int c0 = ((Coords)nb[0]).getColumn(), c1 = ((Coords)nb[1]).getColumn();
 			if (c0 == c1 || r0 == r1) return;
 			// OK, we qualify. Find out which other cell is not in the hungry region.
 			Coords cellA = new Coords(r0, c1), cellB = new Coords(r1, c0);
@@ -544,7 +544,7 @@ class NuriSolver extends Thread  {
 
 	/**
 	 * Production rule 5: Any UNKNOWN cell whose neighbors are all black or all white must be
-	 * that color. (A white cell with number '1' in it is surrounded by black but is never UNKNOWN, so this rule works.) 
+	 * that color. (A white cell with number '1' in it is surrounded by black but is never UNKNOWN, so this rule works.)
 	 * This rule covers a subset of rule 5a but is quicker to compute.
 	 */
 	private void rule5(NuriBoard board) throws ContradictionException {
@@ -572,7 +572,7 @@ class NuriSolver extends Thread  {
 	/**
 	 * Production rule 5a: Any cell that has no path to a number
 	 * must be black; and if there are any known black cells, any cell
-	 * that has no path to a black cell must be white.   
+	 * that has no path to a black cell must be white.
 	 * This rule overlaps somewhat with rule 6 but is easier to implement.
 	 */
 	private void rule5a(NuriBoard board) throws ContradictionException {
@@ -618,26 +618,26 @@ class NuriSolver extends Thread  {
 	 * Production rule 6: Any cell that cannot be reached from a numbered region
 	 * by a path of n UNKNOWN cells (where numbered region's size + n + unnumbered region's size <= limit of either)
 	 * must be black.
-	 * TODO: need a method for tracing a path from A to B of length n. 
+	 * TODO: need a method for tracing a path from A to B of length n.
 	 */
 	private void rule6(NuriBoard board) throws ContradictionException {
 		/*
 		// First check all UNKNOWN cells.
 		for (Coords cell : this) {
 			if (board.get(cell) == NuriBoard.UNKNOWN) {
-				// TODO				
+				// TODO
 			}
 		}
 		// Then check all unnumbered white regions.
 		for (UCRegion region : whiteRegions) {
 			if (region.getLimit() == 0) {
-				// TODO				
+				// TODO
 			}
 		}
 		*/
 	}
 
-	
+
 	/** Check whether we need to pause this thread.
 	 * See http://java.sun.com/javase/7/docs/technotes/guides/concurrency/threadPrimitiveDeprecation.html
 	 */
@@ -658,9 +658,9 @@ class NuriSolver extends Thread  {
 //			break;
 //		}
 		//TODO: test this stuff
-		
+
 		// checkCellToSet(); disabled for now
-		
+
 		if (stopMode == StopMode.ONESTEP ||
 				(stepStopDepth == searchDepth() &&
 						(stopMode == StopMode.STEPOVER ||
@@ -696,7 +696,7 @@ class NuriSolver extends Thread  {
 	/** reset solver to last sure board state. ##TODO implement. */
 	void resetToSure() {
 	}
-	
+
 	//// The following was for trying to change a cell state by user input while the solver
 	//// was running. Dumb idea... way too complicated for now. May resurrect later if important.
 //	/** When cellToSet is non-null, solver must stop when convenient and set the cell
@@ -704,7 +704,7 @@ class NuriSolver extends Thread  {
 //	 * */
 //	Coords cellToSet = null;
 //	char valueToSet = NuriBoard.TOGGLE;
-//	
+//
 //	/** Let the solver know that the user changed value of given cell.
 //	 * Does not take effect until solver is at a point where it is ready to handle
 //	 * this information.

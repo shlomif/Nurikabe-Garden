@@ -6,7 +6,7 @@ use warnings;
 use Test::More tests => 1;
 
 {
-    open my $ack_fh, '-|', 'ack', '--perl', '--cc', '--cpp', '--python', '--java', '--ruby', '--shell', '--ignore-dir=CMakeFiles', '--ignore-dir=_Inline', q/[ \t]+$/, '.'
+    open my $ack_fh, '-|', 'ack', '--perl', '--cc', '--cpp', '--python', '--java', '--ruby', '--shell', '--ignore-dir=CMakeFiles', '--ignore-dir=_Inline', q/[ \t]+\r?$/, '.'
         or die "Cannot open ack for input - $!";
 
     my $count_lines = 0;

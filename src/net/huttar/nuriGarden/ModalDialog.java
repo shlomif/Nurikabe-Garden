@@ -11,17 +11,17 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 /** Small modal dialogs, such as for collecting dimensions for new puzzles.
- * Type of dialog is specified by type string passed to constructor. 
+ * Type of dialog is specified by type string passed to constructor.
  * @author huttarl
  *
  */
 public class ModalDialog extends JDialog {
 	private static final long serialVersionUID = 1L;
 	private static JFileChooser fileChooser = null;
-	
+
 	String type = null, title = null;
 	// static ModalDialog dimensionsDialog = null;
-	
+
 //	ModalDialog(Component parent, String type, String title) {
 //		this.type = type;
 //		this.title = title;
@@ -52,7 +52,7 @@ public class ModalDialog extends JDialog {
     public static Dimension parseDimension(String s, Component parent) {
 
     	if (s == null || s.isEmpty()) return null;
-    	
+
     	StringTokenizer st = new StringTokenizer(s, "x");
 
         int w, h;

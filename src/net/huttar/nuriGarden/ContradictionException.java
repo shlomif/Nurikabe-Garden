@@ -5,7 +5,7 @@ package net.huttar.nuriGarden;
  */
 public class ContradictionException extends Exception {
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 8081284492587462782L;
 

@@ -2,7 +2,7 @@ package net.huttar.nuriGarden;
 
 /**
  * TODO: create a java app built so it can be run w/o Eclipse
- *   TODO: provide instructions for building from source w/o Eclipse (try on K's computer) 
+ *   TODO: provide instructions for building from source w/o Eclipse (try on K's computer)
  * TODO: an "undo" button for edits,
  *   TODO: and for solve steps (manual-only, or also automated?)
  * TODO: vis should show most recent edited cell, when in edit mode
@@ -21,7 +21,7 @@ package net.huttar.nuriGarden;
  * DONE: 1st - to new file (.puz).
  * TODO: 2nd - append to file (.txt format) with id, comment, maybe solution.
  * ##DONE: file open dialog; from whole file (.puz); then can take out hard-wired puzzle load on startup
- *   TODO: load from one-in-file, by ID (.txt) 
+ *   TODO: load from one-in-file, by ID (.txt)
  * FIXED: visualizer doesn't show guesses any more! or at least not in color...
  * TODO: Need a way to stop solver, leaving its sure results on the board but
  * allowing user to set white/black; then restart solver taking into account those
@@ -63,7 +63,7 @@ import javax.swing.JMenuBar;
 
 import net.huttar.nuriGarden.NuriSolver.StopMode;
 
-/** 
+/**
  * Frame for Nurikabe Garden.
  * @author huttarl
  *
@@ -73,7 +73,7 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 
 	private static final long serialVersionUID = 1L;
 	private static final int buttonSpacing = 6;
-	
+
 	public NuriFrame() {
         super("Nurikabe Garden");
     }
@@ -88,19 +88,19 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 	private JButton solveButton;
 	private JCheckBox editModeCB;
 	private Box buttonPanel;
-	
+
 	private int currentNumber = 1;
-	
+
 	public enum GardenMode { EDIT, SOLVE };
 	GardenMode gardenMode = GardenMode.SOLVE;
-		
+
 	private void init() {
 		// helpful: see http://zetcode.com/tutorials/javaswingtutorial/swinglayoutmanagement/
 		Container panel = this.getContentPane();
 
 		//FIXME: menu disappears behind PApplet. Need to catch event when any menu opens
 		// and pause the visualizer?  (noLoop())
-		// No, that won't help... it's already not looping. The problem is the z-order 
+		// No, that won't help... it's already not looping. The problem is the z-order
 		// difference between AWT & Swing... http://blogs.sun.com/Swing/entry/awt_swt_swing_java_gui1
 		// Solution would be to move menu and PApplet into different windows;
 		// or stop using Processing. Or switch from Swing to AWT.
@@ -113,20 +113,20 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 		saveItem.setMnemonic(KeyEvent.VK_S);
 		fileMenu.add(saveItem);
 		menu.add(fileMenu);
-		
+
 		buttonPanel = new Box(BoxLayout.Y_AXIS);
 		// BoxLayout boxLayout = new BoxLayout(buttonPanel, BoxLayout.Y_AXIS);
 		// buttonPanel.setLayout(boxLayout);
 		panel.add(buttonPanel, BorderLayout.EAST);
 		buttonPanel.setBorder(BorderFactory.createEtchedBorder());
-		
+
 		makeButton("New", KeyEvent.VK_N,
 				"Create a new puzzle", "new");
 		// TODO: make Ctrl+N work for this.
 		// Probably by making a menu item.
 		// This doesn't work: newButton.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S,
         //  java.awt.Event.CTRL_MASK));
-		
+
 		makeButton("Load", KeyEvent.VK_L,
 				"Load puzzle from a file", "load");
 
@@ -149,7 +149,7 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 		editModeCB.setVisible(true);
 		editModeCB.setMnemonic(KeyEvent.VK_E);
 		buttonPanel.add(editModeCB);
-		
+
         // panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         // panel.setLayout(new GridLayout(5, 4, 5, 5));
 
@@ -164,13 +164,13 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 
         depthLabel = new JLabel();
         labelContainer.add(depthLabel);
-        
+
 		// space between labels
 		labelContainer.add(Box.createHorizontalStrut(20));
 
         statusLabel = new JLabel();
         labelContainer.add(statusLabel);
-        
+
         // TODO: get frame to properly surround PApplet.
         setSize(700, 500);
         setResizable(true);
@@ -185,7 +185,7 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 		// initial state, debug mode, visualizer
 		solver = new NuriSolver(board, false, vis);
 		// board.setSolver(solver);
-		
+
         // For embedding Processing applet see
         // http://dev.processing.org/reference/core/javadoc/processing/core/PApplet.html
         vis = new NuriCanvas(board, solver, this);
@@ -203,9 +203,9 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 
 		// Listen for resize events on the frame:
 		this.addComponentListener(this);
-		
+
         setVisible(true);
-        
+
         // important to call this whenever embedding a PApplet.
         // It ensures that the animation thread is started and
         // that other internal variables are properly set.
@@ -213,21 +213,21 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 		vis.setSizeToBoard(board);
         vis.repaint();
 	}
-	
+
 	private JButton makeButton(String label, int mnem, String toolTip,
 			String actionCommand) {
 		if (buttonPanel.getComponentCount() > 0) {
 			// space between buttons
 			buttonPanel.add(Box.createVerticalStrut(buttonSpacing));
 		}
-		
+
 		JButton newButton = new JButton(label);
 		newButton.setMnemonic(mnem);
 		newButton.setToolTipText(toolTip);
 		newButton.setActionCommand(actionCommand);
 		newButton.addActionListener(this);
 		buttonPanel.add(newButton);
-		
+
 		return newButton;
 	}
 
@@ -244,7 +244,7 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 		}
 		depthLabel.setText("Search depth: " + solver.searchDepth());
 	}
-	
+
 	public void actionPerformed(ActionEvent e) {
 		if ("new".equals(e.getActionCommand())) {
 			resetBoard(true);
@@ -266,10 +266,10 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
         	// assert(false); // unrecognized action event
         }
     }
-	
+
 	/** Select a file via chooser dialog, and load a new board from it. */
 	private void load() {
-		File file = ModalDialog.getLoadFile(this); 
+		File file = ModalDialog.getLoadFile(this);
 		if (file != null) {
 			parser = new NuriParser(file.getPath());
 			board = parser.loadFile(9); //TODO: specify id or at least index
@@ -284,17 +284,17 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 	/** Launch a file-save dialog, and save the current board to a file. */
 	private void save() {
 		if (board == null) return;
-		// TODO: allow saving "current" file w/o having to re-select the file and confirm overwrite. 
-		File file = ModalDialog.getSaveFile(this); 
+		// TODO: allow saving "current" file w/o having to re-select the file and confirm overwrite.
+		File file = ModalDialog.getSaveFile(this);
 		if (file != null) NuriWriter.saveToFile(this, board, file);
 	}
 
-	/** Erase black & white cell states, leaving only numbers. 
+	/** Erase black & white cell states, leaving only numbers.
 	 * If isNew, create a fresh puzzle board, using pop up dialog to ask for dimensions. */
 	void resetBoard(boolean isNew) {
 		Dimension boardSize = null;
 		if (isNew) {
-			boardSize = ModalDialog.getBoardDimensions(this); // new Dimension(9, 9); // 
+			boardSize = ModalDialog.getBoardDimensions(this); // new Dimension(9, 9); //
 			if (boardSize == null) return; // if user canceled
 			setGardenMode(GardenMode.EDIT);
 		}
@@ -331,8 +331,8 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 	public static void main(String[] args) {
 		NuriFrame nf = new NuriFrame();
 		nf.init();
-	}    
-	
+	}
+
 	/** Because we implement ComponentListener, we have to provide all these
 	 * methods, even though we may only care about resize events at the moment.
 	 * Actually these don't seem to be helping... the board still does not get redrawn
@@ -342,7 +342,7 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
     public void componentMoved(ComponentEvent e) { }
 
     public void componentResized(ComponentEvent e) {
-    	if (vis != null) vis.repaint();    	
+    	if (vis != null) vis.repaint();
     }
 
     public void componentShown(ComponentEvent e) {
@@ -352,7 +352,7 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 
 	void keyPressed(char key) {
 		int newNumber = currentNumber;
-		
+
 		// System.out.println("Visualizer got key: " + key);
 		/* First, set mode based on key categories: */
 		switch(key) {
@@ -380,7 +380,7 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 				setGardenMode(GardenMode.EDIT);
 			break;
 		}
-		
+
 		/* Now more specific actions for individual keys: */
 		/**##FIXME: single-stepping is broken right now! */
 		switch(key) {
@@ -438,17 +438,17 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 
 		if (gardenMode == GardenMode.SOLVE) {
 			solver.maybeStart(); // start if not yet started
-	
+
 			if (!solver.threadSuspended) {
 				synchronized(this) {
-		            this.notifyAll();					
+		            this.notifyAll();
 				}
 			}
 		} else {
 			if (newNumber < 1) newNumber = 1;
 			else if (newNumber > NuriBoard.maxCellValue)
-				newNumber = NuriBoard.maxCellValue; 
-	
+				newNumber = NuriBoard.maxCellValue;
+
 			/** TODO: also change last edited cell's number, if any
 			if (newNumber != currentNumber &&
 					lastChangedCell != null &&
@@ -456,7 +456,7 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 					placeNumber(lastChangedCell.r, lastChangedCell.c,
 						board.NUMBERS.charAt(newNumber));
 			*/
-			
+
 			currentNumber = newNumber;
 			/** TODO: display currentNumber on a status label somewhere. */
 		}
@@ -479,7 +479,7 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 			placeNumber(r, c, currentNumber);
 		}
 	}
-	
+
 	/** Place new number on board.
 	 * ##TODO: update other state accordingly. Maybe that's done?
 	 */
@@ -489,7 +489,7 @@ public class NuriFrame extends JFrame implements ActionListener, ComponentListen
 		assert(!solver.isAlive());
 		board.initializeCell(r, c, NuriBoard.NUMBERS.charAt(n-1));
 		board.setGuessLevel(r, c, (short)0);
-		/** TODO: if two numbers are adjacent, mark them red or something. */ 
+		/** TODO: if two numbers are adjacent, mark them red or something. */
 		board.prepareStats(false);
 		//DONE: reset solver completely.
 		solver = new NuriSolver(board, false, vis);

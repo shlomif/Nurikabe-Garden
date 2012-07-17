@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package net.huttar.nuriGarden;
 
@@ -21,13 +21,13 @@ import processing.core.PFont;
  * TODO: develop this to replace NuriVisualizer.
  */
 public class NuriCanvas extends JPanel implements MouseListener {
-	
+
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = -1306716595311291496L;
-	
-	private PFont currFont = null, bigFont = null, smallFont = null; 
+
+	private PFont currFont = null, bigFont = null, smallFont = null;
 	private final int smallFontSize = 24, bigFontSize = 40;
 	private int currFontSize = 0;
 
@@ -36,11 +36,11 @@ public class NuriCanvas extends JPanel implements MouseListener {
 	private int cellW = prefCellSize, cellH = prefCellSize;
 
 	private int frameRate = 10; //## Do something with this.
-	
+
 	NuriFrame frame = null;
 	NuriBoard puz = null;
 	NuriSolver solver = null;
-	
+
 	public NuriCanvas(NuriBoard board, NuriSolver s, NuriFrame f) {
 		super(); // redundant?
 		puz = board;
@@ -53,9 +53,9 @@ public class NuriCanvas extends JPanel implements MouseListener {
 	public void setup() {
 		setSize(400, 400); // Is this right for JComponent?
 		if (puz != null) setSizeToBoard(puz);
-		
+
 		System.out.println(Runtime.getRuntime().availableProcessors());
-		
+
 		// Start with given file and debug mode.
 		// solver = new NuriSolver("../samples/lgo_1500.txt", 19, false, this);
 		// solver = new NuriSolver("../samples/tiny3.puz", 1, false, this);
@@ -69,19 +69,19 @@ public class NuriCanvas extends JPanel implements MouseListener {
 		// textAlign(); // CENTER
 		// currFontSize = currFont.size; // docs don't say if this is pixels or points
 		// System.out.println("Curr font size: " + currFontSize);
-		
-		// use HSB color mode with low-res hue 
+
+		// use HSB color mode with low-res hue
 		// colorMode(HSB, 30, 100, 100);
 		// TODO: noLoop(); // draw only on demand, except during solving
 	}
-        
+
 	void setSizeToBoard(NuriBoard puz) {
 		int prefW = puz.getWidth() * prefCellSize + margin * 2;
-		int prefH = puz.getHeight() * prefCellSize + margin * 2; 
+		int prefH = puz.getHeight() * prefCellSize + margin * 2;
 		setPreferredSize(new Dimension(prefW, prefH));
 		setSize(prefW, prefH); // TODO: right?
 	}
-	
+
 	void decideFont(int cellSize) {
 		if (cellSize < (bigFontSize * 1.2) && currFont != smallFont) {
 			currFont = smallFont;
@@ -117,8 +117,8 @@ public class NuriCanvas extends JPanel implements MouseListener {
     	int i, j;
 
     	// background(0, 0, 75); // light gray
-    	
-    	
+
+
     	AffineTransform saveXform = g2d.getTransform(); // pushMatrix();
     	g2d.translate(margin, margin);
     	g2d.setColor(Color.gray); // stroke(0, 0, 40); // medium gray
@@ -133,7 +133,7 @@ public class NuriCanvas extends JPanel implements MouseListener {
 	        drawLines(cellW, cellH, top, left, right, bottom, g2d);
 	        g2d.translate(-1, -1); // popMatrix();
         }
-        
+
         //noStroke();
         for (i = 0; i < puz.getHeight(); i++) {
         	for (j = 0; j < puz.getWidth(); j++) {
@@ -154,7 +154,7 @@ public class NuriCanvas extends JPanel implements MouseListener {
         		}
         	}
         }
-        
+
         if (solver != null && solver.lastChangedCell != null) {
 	        g2d.setColor(Color.yellow); // yellow, (float) 5.1, 85, 100
 	        g2d.setStroke(thickStroke);// strokeWeight((float) (cellW * 0.1));
@@ -162,7 +162,7 @@ public class NuriCanvas extends JPanel implements MouseListener {
 	        j = solver.lastChangedCell.getColumn();
 	        g2d.drawRect(cellW * j, cellH * i, cellW, cellH);
         }
-        
+
         g2d.setTransform(saveXform); // popMatrix();
     }
 
@@ -174,7 +174,7 @@ public class NuriCanvas extends JPanel implements MouseListener {
         	g2d.drawLine(j * cellW, top, j * cellW, bottom);
 	}
 
-	/** Draw digits on grid. 
+	/** Draw digits on grid.
      * c is character representation of digit.
      * Nudge left if 2-digit number. */
     private void drawNumber(char c, int x, int y, Graphics2D g2d) {
@@ -199,19 +199,19 @@ public class NuriCanvas extends JPanel implements MouseListener {
     		g2d.setColor(Color.getHSBColor(guessLevel / 30.0f, 0.4f,
     				(value == NuriBoard.BLACK) ? 0.4f : 1.0f));
     }
-    
+
 	void setSolver(NuriSolver s) {
-		solver = s;		
+		solver = s;
 	}
 
 	public void paintComponent(Graphics g) {
-        super.paintComponent(g); 
+        super.paintComponent(g);
 
         Graphics2D g2d = (Graphics2D) g;
 
 		// System.out.println("In paintComponent() at " + System.currentTimeMillis()); // debugging
 		if (solver != null && solver.latestBoard != null) {
-			if (puz == null)				
+			if (puz == null)
 				setSizeToBoard(solver.latestBoard);
 			puz = solver.latestBoard;
 			drawGrid(puz, g2d);
@@ -226,7 +226,7 @@ public class NuriCanvas extends JPanel implements MouseListener {
 
 	@Override
 	public void mouseEntered(MouseEvent e) {
-		// we don't care about this event.		
+		// we don't care about this event.
 	}
 
 	@Override
@@ -236,17 +236,17 @@ public class NuriCanvas extends JPanel implements MouseListener {
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
-		// we don't care about this event.		
+		// we don't care about this event.
 	}
 
 	public void mousePressed(MouseEvent e) {
-		//##FIXME: r seems to be off by one 
+		//##FIXME: r seems to be off by one
 		// get cell where the click occurred
 		int c = (e.getX() - margin) / cellW;
 		int r = (e.getY() - margin) / cellH;
 		// System.out.println("Mouse clicked in cell: " + c + ", " + r);
 		frame.clickedCell(r, c, (e.getButton() == MouseEvent.BUTTON1));
-		
+
 	}
-	
+
 }
