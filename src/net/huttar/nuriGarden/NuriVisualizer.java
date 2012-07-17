@@ -94,7 +94,7 @@ class NuriVisualizer extends PApplet {
 		currFont = bigFont;
 		textFont(bigFont);
 		textAlign(CENTER);
-		currFontSize = currFont.size; // docs don't say if this is pixels or points
+		currFontSize = currFont.getSize(); // docs don't say if this is pixels or points
 		// System.out.println("Curr font size: " + currFontSize);
 		
 		// use HSB color mode with low-res hue 
