@@ -5,11 +5,11 @@ import java.util.Iterator;
 public class NurIterator implements Iterator<Coords> {
 
 	private NuriBoard puzzle;
-	
+
 	int row;
-	
+
 	int column;
-	
+
 	public NurIterator(NuriBoard puzzle) {
 		super();
 		this.puzzle = puzzle;

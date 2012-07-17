@@ -76,11 +76,11 @@ class Region extends HashSet<Coords> {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Return the set of cells adjacent to this Region, not including cells
 	 * in this Region.
-	 * 
+	 *
 	 */
 	Region getOnlyNeighbors() {
 		Region result = new Region(puzzle);

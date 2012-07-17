@@ -26,4 +26,8 @@ java_bins: $(JAVA_BINS)
 $(JAVA_BINS): bin/%.class: src/%.java
 	javac -d bin $(JAVA_SRCS)
 
+test: all
+	prove tests/tap/*.t
 
+runtest: all
+	runprove tests/tap/*.t

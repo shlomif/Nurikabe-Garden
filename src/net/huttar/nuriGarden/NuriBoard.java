@@ -17,7 +17,7 @@ package net.huttar.nuriGarden;
  * pick one of them and try making it black as that will imply the other is white.
  * Or find a place where there are two black cells in a square of 4 with
  * two unknowns; try making one of the unknowns black.
- * This is partially implemented (pickUnknownCell()). Can make it smarter. 
+ * This is partially implemented (pickUnknownCell()). Can make it smarter.
  * */
 /** TODO:
  * Make debugging output more helpful for gauging progress when solving a large puzzle.
@@ -52,10 +52,10 @@ import java.util.*;
 
 import net.huttar.nuriGarden.NuriSolver;
 
-/** Program to solve NuriBoard puzzles. 
+/** Program to solve NuriBoard puzzles.
  * A "NuriBoard" instance represents a board state.
  * Used to be one class with NuriSolver, named Nurikabe, but I split it up. */
-class NuriBoard implements Iterable<Coords>, Cloneable  { 
+class NuriBoard implements Iterable<Coords>, Cloneable  {
 	/** Character for a filled-in cell. */
 	static final char BLACK = '#';
 	/** Character for a cell known to be white. */
@@ -70,12 +70,12 @@ class NuriBoard implements Iterable<Coords>, Cloneable  {
 	/** Allowed number characters: 1 to 35, base 36 */
 	static final String NUMBERS = "123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 	static final int maxCellValue = NUMBERS.length();
-	
+
 //	/** The solver using this board state. */
 //	private NuriSolver solver;
-//	
+//
 //	void setSolver(NuriSolver s) { solver = s; }
-	
+
 	/** Depth of recursive search. */
 	short searchDepth;
 
@@ -85,7 +85,7 @@ class NuriBoard implements Iterable<Coords>, Cloneable  {
 	 */
 	/* Obsolete.
 	static NuriBoard init(String filename, int i, NuriSolver solver) {
-		NuriBoard.debug = debug; 
+		NuriBoard.debug = debug;
 		NuriBoard puzzle = new NuriBoard(filename, i);
 		puzzle.solver = solver;
 		// debug = true;
@@ -93,24 +93,24 @@ class NuriBoard implements Iterable<Coords>, Cloneable  {
 		return puzzle;
 	}
 	*/
-	
+
 	/** Grid of cells. Each is BLACK, WHITE, UNKNOWN, or a digit 1-9A-Z. */
 	char[][] grid;
 
 	private short[][] guessLevel;
-	
+
 	/** Number of white cells expected in the solution. */
 	private int expWhiteCount = 0;
 
 	/** Number of black cells expected in the solution. */
 	private int expBlackCount = 0;
-	
+
 	/** list of white ucRegions being used during solving. */
 	ArrayList<UCRegion> whiteRegions;
 
 	/** list of black ucRegions being used during solving. */
 	ArrayList<UCRegion> blackRegions;
-	
+
 	/** true if this puzzle's state is sure.
 	 * This means it is not the result of guesses, except for guesses
 	 * such that the inverse of the guess has already led to a contradiction.
@@ -118,7 +118,7 @@ class NuriBoard implements Iterable<Coords>, Cloneable  {
 	 * intrinsically inconsistent (has no solution).
 	 */
 	boolean isSure = true;
-	
+
 	/** cached result of isValid() call. */
 	boolean validityKnown = false;
 
@@ -126,7 +126,7 @@ class NuriBoard implements Iterable<Coords>, Cloneable  {
 
 	/** The puzzle that this puzzle is a hypothesis branch from. */
 	NuriBoard predecessor = null;
-	
+
 	NuriBoard() {
 	}
 
@@ -135,7 +135,7 @@ class NuriBoard implements Iterable<Coords>, Cloneable  {
 		newGrid(height, width);
 		for (int i = 0; i < getHeight(); i++)
 			for (int j = 0; j < getWidth(); j++)
-				initializeCell(i, j, UNKNOWN);			
+				initializeCell(i, j, UNKNOWN);
 		updateGuessLevel();
 		prepareStats(true);
 	}
@@ -146,7 +146,7 @@ class NuriBoard implements Iterable<Coords>, Cloneable  {
 		this.whiteRegions = whiteRegions;
 		this.grid = grid;
 		this.searchDepth = searchDepth;
-		this.numUnknownCells = numUnknownCells;		
+		this.numUnknownCells = numUnknownCells;
 	}
 
 	/**
@@ -158,16 +158,16 @@ class NuriBoard implements Iterable<Coords>, Cloneable  {
 		blackRegions = new ArrayList<UCRegion>();
 		whiteRegions = new ArrayList<UCRegion>();
 		expWhiteCount = 0;
-		
+
 		if (!isNew) {
 			for (Coords cell : this) {
 				if (isANumber(get(cell))) {
-					UCRegion region = new UCRegion(this, cell); 
+					UCRegion region = new UCRegion(this, cell);
 					whiteRegions.add(region);
 					expWhiteCount += region.getLimit();
 				} else if (get(cell) == BLACK && containingRegion(cell) == null) {
 					// sometimes we have black cells in input files for testing.
-					UCRegion region = new UCRegion(this, cell); 
+					UCRegion region = new UCRegion(this, cell);
 					blackRegions.add(region);
 				}
 			}
@@ -255,7 +255,7 @@ class NuriBoard implements Iterable<Coords>, Cloneable  {
 	static boolean isWhite(char c) {
 		return c == WHITE || isANumber(c);
 	}
-	
+
 	/** Return WHITE if the given character is a number; otherwise return given
 	 * character. */
 	static protected char unifyWhite(char c) {
@@ -303,23 +303,23 @@ class NuriBoard implements Iterable<Coords>, Cloneable  {
 		}
 		return null;
 	}
-	
+
 	/** Add given cell to a UCRegion in whiteRegions or blackRegions.
 	 * May involve creating a region, merging two regions, or simply growing one
-	 * adjacent region. */ 
+	 * adjacent region. */
 	protected UCRegion addToARegion(Coords cell) throws ContradictionException {
 		HashSet<UCRegion> neighborRegions = new HashSet<UCRegion>();
 		char content = get(cell);
 		NuriSolver.debugMsg(searchDepth, "Adding cell " + cell + "(" + content + ") to a region");
-		// Using immediate neighbors of cell, 
+		// Using immediate neighbors of cell,
 		// make collection of neighbors' regions of needed color
 		for (Coords neighbor : neighbors(cell)) {
 			if (get(neighbor) == content || (isWhite(get(neighbor)) && isWhite(content))) {
 				UCRegion contReg = containingRegion(neighbor);
 				neighborRegions.add(contReg);
 			}
-		}		
-		
+		}
+
 		Iterator<UCRegion> iter = neighborRegions.iterator();
 		UCRegion firstRegion = !neighborRegions.isEmpty() ? (UCRegion)iter.next() : null;
 		List<UCRegion> puzzleColorRegions = (content == WHITE ? whiteRegions : blackRegions);
@@ -330,11 +330,11 @@ class NuriBoard implements Iterable<Coords>, Cloneable  {
 			UCRegion newRegion = new UCRegion(this, cell);
 			puzzleColorRegions.add(newRegion);
 			return newRegion;
-		case 1:			
+		case 1:
 			// If one available region, add to it.
 			firstRegion.addCell(cell);
 			return firstRegion;
-		default:		
+		default:
 			// If multiple available regions, add cell to first one
 			// and then join the remaining regions.
 			firstRegion.addCell(cell);
@@ -348,9 +348,9 @@ class NuriBoard implements Iterable<Coords>, Cloneable  {
 			return firstRegion;
 		}
 	}
-	
+
 	int numUnknownCells = 0;
-	
+
 	void setGuessLevel(Coords cell, short gl) {
 		guessLevel[cell.getRow()][cell.getColumn()] = gl;
 	}
@@ -358,15 +358,15 @@ class NuriBoard implements Iterable<Coords>, Cloneable  {
 	void setGuessLevel(int c, int r, short gl) {
 		guessLevel[c][r] = gl;
 	}
-	
+
 	/** Set guessLevel of all cells to at most the current guessLevel.
-	 * This is done when a trial/hypothesis completes successfully. 
+	 * This is done when a trial/hypothesis completes successfully.
 	 */
 	void updateGuessLevel() {
 		for (int i = 0; i < getHeight(); i++)
 			for (int j = 0; j < getWidth(); j++)
 				if (getGuessLevel(i, j) > searchDepth)
-					setGuessLevel(i, j, searchDepth);		
+					setGuessLevel(i, j, searchDepth);
 	}
 
 	/** Return an unknown cell for hypothesizing about, and a color for the initial hypothesis.
@@ -376,7 +376,7 @@ class NuriBoard implements Iterable<Coords>, Cloneable  {
 	 * about the values of cells.
 	 */
 	Object[] pickUnknownCell() {
-		Character WHITEchar = new Character(NuriBoard.WHITE); 
+		Character WHITEchar = new Character(NuriBoard.WHITE);
 		// First preference: find a 1-hungry region with just two
 		// spots to grow into.
 		UCRegion region1 = null;
@@ -391,7 +391,7 @@ class NuriBoard implements Iterable<Coords>, Cloneable  {
 		// into, just pick any of the 1-hungry regions.
 		if (region1 != null)
 			return new Object[]{region1.getNeighbors("" + NuriBoard.UNKNOWN).iterator().next(), WHITEchar};
-		
+
 		// last resort: return any unknown cell.
 		for (Coords cell : this) {
 			if (get(cell) == NuriBoard.UNKNOWN) return new Object[]{cell, WHITEchar};
@@ -416,7 +416,7 @@ class NuriBoard implements Iterable<Coords>, Cloneable  {
 		 C: 1) We check that each white region has no more than one number below, and also in UCRegion.addAllCells().
 		    2) We verify that each white region that doesn't have a number has the potential to grow, and thus
 		    connect to a numbered region. We could (TODO) also check that there is a path of UNKNOWN cells leading to a
-		    numbered region (bonus: such that the length of the path plus the size of the two regions <= the number).  
+		    numbered region (bonus: such that the length of the path plus the size of the two regions <= the number).
 		 D: rule1 checks that no full white regions have neighboring cells of the same color. Below we check that no
 		 	region has more cells than its limit.
 		 */
@@ -450,14 +450,14 @@ class NuriBoard implements Iterable<Coords>, Cloneable  {
 
 		changed = true;
 		validityKnown = false;
-		
+
 		grid[cell.getRow()][cell.getColumn()] = value;
 		addToARegion(cell);
 	}
 
 	/** Set the value at a given location.
 	 * Suitable for use in initializing a board.
-	 * 
+	 *
 	 * @param r: row of cell
 	 * @param c: column of cell
 	 * @param value: new value
@@ -501,7 +501,7 @@ class NuriBoard implements Iterable<Coords>, Cloneable  {
 			copyRegions(whiteRegions, newPuzzle), (short)(searchDepth + 1), numUnknownCells);
 		return (Object)newPuzzle;
 	}
-	
+
 	/** Return mostly-deep copy of a regions List, with newPuzzle context.
 	 * Coords are merely copied by reference.
 	 */
@@ -524,7 +524,7 @@ class NuriBoard implements Iterable<Coords>, Cloneable  {
 		Region region = new Region(this, cell);
 		return region.find(allowable, target);
 	}
-	
+
 	public String toString() {
 		return toString(null);
 	}
@@ -539,15 +539,15 @@ class NuriBoard implements Iterable<Coords>, Cloneable  {
 		for (int r = 0; r < getHeight(); r++) {
 			result.append(indent.toString());
 			for (int c = 0; c < getWidth(); c++) {
-				result.append(grid[r][c]);				
+				result.append(grid[r][c]);
 				if (modified != null && c == modified.getColumn() && r == modified.getRow())
-					result.append(">");				
+					result.append(">");
 				else if (modified != null && c == modified.getColumn() - 1 && r == modified.getRow())
-					result.append("<");				
+					result.append("<");
 				else
-					result.append(" ");				
+					result.append(" ");
 			}
-			result.append("\n");				
+			result.append("\n");
 		}
 		return result.toString();
 	}
@@ -563,7 +563,7 @@ class NuriBoard implements Iterable<Coords>, Cloneable  {
 				else
 					result.append('-');
 			}
-			result.append("\n");				
+			result.append("\n");
 		}
 		return result.toString();
 	}
@@ -582,39 +582,39 @@ class NuriBoard implements Iterable<Coords>, Cloneable  {
 	 */
 	boolean isValid() throws ContradictionException {
 		if (validityKnown) return validity; // skip the unnecessary computations!
-		
+
 		// It will be known by the time we return from this method or throw an exception.
 		validityKnown = true;
-		
+
 		if (blackRegions.size() > 1) {
 			validity = false;
 			throw new ContradictionException("Potential solution has more than one black region");
 		}
-		
+
 		/* The following checks are probably redundant, since they should be implied by
 		 * the checkConstraints() call and the foregoing. I think.
 		 * If they are redundant, then they will only be called when we've found a solution,
 		 * which is only once per solve()!* And they serve as a confidence-builder.
 		 * If they turn out not to be redundant... then good thing we have them!
-		 * 
+		 *
 		 * *Actually, this method may be called once or more for every level of recursive backtracking
 		 * on the way back out after a successful solve. DONE: We need to cache the result for that case...
 		 * and clear the cache if something changes. Need a static? (class) member: boolean isSolved
 		 */
 
 		// check that black region and all white islands are the right size
-		
+
 		// A correct solution will always have a black region, except for the most boring puzzles.
 		// But we have to check it or the next statement can throw an array out-of-bounds exception.
 		if (blackRegions.size() > 0) {
 			UCRegion bRegion = blackRegions.get(0);
 			if (bRegion.size() != bRegion.getLimit()) {
 				validity = false;
-				throw new ContradictionException("Black region has wrong size. Expected " + 
+				throw new ContradictionException("Black region has wrong size. Expected " +
 						bRegion.getLimit() + " but found " + bRegion.size());
 			}
 		}
-		
+
 		for (UCRegion wRegion : whiteRegions) {
 			if (wRegion.getLimit() == 0) {
 				validity = false;
@@ -623,11 +623,11 @@ class NuriBoard implements Iterable<Coords>, Cloneable  {
 
 			if (wRegion.size() != wRegion.getLimit()) {
 				validity = false;
-				throw new ContradictionException("White region has wrong size. Expected " + 
+				throw new ContradictionException("White region has wrong size. Expected " +
 					wRegion.getLimit() + " but found " + wRegion.size());
 			}
 		}
-		
+
 		// check for 2x2 black areas again, just to be thorough. We can't be sure that rule4()
 		// has been run since the last inference.
 		for (int i = 0; i < getHeight() - 1; i++) {
@@ -641,7 +641,7 @@ class NuriBoard implements Iterable<Coords>, Cloneable  {
 				}
 			}
 		}
-		
+
 		validity = true;
 		return true;
 	}

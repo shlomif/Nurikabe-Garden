@@ -2,7 +2,7 @@
  * TODO: features for drafting a puzzle...
  * - mode where clicking on a cell places an island, e.g. a 1, and clicking again increments it
  *   - right-clicking decrements it, and when it reaches 0 it's gone
- * - function to "sprinkle seeds" 
+ * - function to "sprinkle seeds"
  * TODO: need to redraw the board on a resize, even when in noLoop.
  *   So we need to detect a resize either here, or in the frame.
  *   Could detect it in the frame and then call vis.redraw().
@@ -13,7 +13,7 @@
  * Surround the Processing applet component with a regular Java GUI frame
  * or whatever. Using Swing. Some say it's bloated, others say it's not substantially
  * slower than SWT. It sounds like Swing is more widespread and easier to use.
- * I'll go with it. I don't expect the UI to be the performance bottleneck. 
+ * I'll go with it. I don't expect the UI to be the performance bottleneck.
  * DONE: during solving, turn on loop; when not solving, turn it off.
  *  (but make sure redraw still occurs).
  * DONE: cache result of isSolved; pass it back and forth via setState; clear it when sthg changes
@@ -41,7 +41,7 @@
  * TODO: profiling (accumulate performance stats about rules fired)
  * TODO: add some rules?
  * TODO: batch mode
- * DONE: when user resizes window, resize grid squares accordingly. (but not font?) 
+ * DONE: when user resizes window, resize grid squares accordingly. (but not font?)
  */
 
 package net.huttar.nuriGarden;
@@ -54,23 +54,23 @@ import processing.core.PFont;
 class NuriVisualizer extends PApplet {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = -1306716595311291496L;
-	
-	private PFont currFont = null, bigFont = null, smallFont = null; 
+
+	private PFont currFont = null, bigFont = null, smallFont = null;
 	private final int smallFontSize = 24, bigFontSize = 40;
 	private int currFontSize = 0;
 
 	private final int margin = 10;
 	private final int prefCellSize = smallFontSize;
 	private int cellW = prefCellSize, cellH = prefCellSize;
-	
+
 	NuriFrame frame = null;
 	NuriBoard puz = null;
 	NuriSolver solver = null;
-	
-	
+
+
 	public NuriVisualizer(NuriBoard board, NuriSolver s) {
 		super();
 		puz = board;
@@ -80,9 +80,9 @@ class NuriVisualizer extends PApplet {
 	public void setup() {
 		size(400, 400); // default
 		if (puz != null) setSizeToBoard(puz);
-		
+
 		System.out.println(Runtime.getRuntime().availableProcessors());
-		
+
 		// Start with given file and debug mode.
 		// solver = new NuriSolver("../samples/lgo_1500.txt", 19, false, this);
 		// solver = new NuriSolver("../samples/tiny3.puz", 1, false, this);
@@ -96,19 +96,19 @@ class NuriVisualizer extends PApplet {
 		textAlign(CENTER);
 		currFontSize = currFont.getSize(); // docs don't say if this is pixels or points
 		// System.out.println("Curr font size: " + currFontSize);
-		
-		// use HSB color mode with low-res hue 
+
+		// use HSB color mode with low-res hue
 		colorMode(HSB, 30, 100, 100);
 		noLoop(); // draw only on demand, except during solving
 	}
-        
+
 	void setSizeToBoard(NuriBoard puz) {
 		int prefW = puz.getWidth() * prefCellSize + margin * 2;
-		int prefH = puz.getHeight() * prefCellSize + margin * 2; 
+		int prefH = puz.getHeight() * prefCellSize + margin * 2;
 		setPreferredSize(new Dimension(prefW, prefH));
 		size(prefW, prefH);
 	}
-	
+
 	void decideFont(int cellSize) {
 		if (cellSize < (bigFontSize * 1.2) && currFont != smallFont) {
 			currFont = smallFont;
@@ -120,7 +120,7 @@ class NuriVisualizer extends PApplet {
 			currFontSize = bigFontSize;
 		}
 	}
-	
+
 	//TODO: draw numbers in decimal (2-digit) when > 9
     void drawGrid(NuriBoard puz) {
 		// System.out.println("In drawGrid() at " + System.currentTimeMillis()); // debugging
@@ -140,7 +140,7 @@ class NuriVisualizer extends PApplet {
     	int i, j;
 
     	background(0, 0, 75); // light gray
-    	
+
     	pushMatrix();
     	translate(margin, margin);
 
@@ -157,7 +157,7 @@ class NuriVisualizer extends PApplet {
 	        drawLines(cellW, cellH, top, left, right, bottom);
 	        popMatrix();
         }
-        
+
         noStroke();
         for (i = 0; i < puz.getHeight(); i++) {
         	for (j = 0; j < puz.getWidth(); j++) {
@@ -177,7 +177,7 @@ class NuriVisualizer extends PApplet {
         		}
         	}
         }
-        
+
         if (solver != null && solver.lastChangedCell != null) {
 	        stroke((float) 5.1, 85, 100); // yellow
 	        noFill();
@@ -186,7 +186,7 @@ class NuriVisualizer extends PApplet {
 	        j = solver.lastChangedCell.getColumn();
 	        rect(cellW * j, cellH * i, cellW, cellH);
         }
-        
+
     	popMatrix();
     }
 
@@ -198,7 +198,7 @@ class NuriVisualizer extends PApplet {
         	line(j * cellW, top, j * cellW, bottom);
 	}
 
-	/** Draw digits on grid. 
+	/** Draw digits on grid.
      * c is character representation of digit.
      * Nudge left if 2-digit number. */
     private void drawNumber(char c, int x, int y) {
@@ -223,18 +223,18 @@ class NuriVisualizer extends PApplet {
     		fill(guessLevel, 40,
     				(value == NuriBoard.BLACK) ? 40 : 100);
     }
-    
+
 	public void draw() {
 		// System.out.println("In draw() at " + System.currentTimeMillis()); // debugging
 		if (solver != null && solver.latestBoard != null) {
-			if (puz == null)				
+			if (puz == null)
 				setSizeToBoard(solver.latestBoard);
 			puz = solver.latestBoard;
 			drawGrid(puz);
 			frame.updateStatus();
 		}
 	}
-	
+
 	public void mousePressed() {
 		// get cell where the click occurred
 		int c = (mouseX - margin) / cellW;
@@ -242,13 +242,13 @@ class NuriVisualizer extends PApplet {
 		// System.out.println("Mouse clicked in cell: " + c + ", " + r);
 		frame.clickedCell(r, c, (mouseButton == LEFT));
 	}
-	
+
 	//TODO: detect keys in the frame, not in the visualizer
 	public void keyPressed() {
 		frame.keyPressed(key);
 	}
 
 	void setSolver(NuriSolver s) {
-		solver = s;		
+		solver = s;
 	}
 }

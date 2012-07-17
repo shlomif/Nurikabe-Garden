@@ -13,7 +13,7 @@ class Coords {
 	int getRow() {
 		return row;
 	}
-	
+
 	/** Return Manhattan distance between this cell and another. */
 	int manhattanDist(Coords cell) {
 		return Math.abs(row - cell.row) + Math.abs(column - cell.column);
@@ -22,7 +22,7 @@ class Coords {
 	public String toString() {
 		return "<" + row + "," + column + ">";
 	}
-	
+
 	int getColumn() {
 		return column;
 	}
@@ -45,7 +45,7 @@ class Coords {
 		return (row == thatCoords.row) && (column == thatCoords.column);
 	}
 
-	/** set coords of this to given cell */ 
+	/** set coords of this to given cell */
 	void copy(Coords cell) {
 		row = cell.row;
 		column = cell.column;
