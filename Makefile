@@ -23,8 +23,10 @@ all: java_bins
 
 java_bins: $(JAVA_BINS)
 
+# javac handles dependencies so the easiest and most reliable thing is to
+# lump the generation of all of the .class files together.
 $(JAVA_BINS): bin/%.class: src/%.java
-	javac -d bin $<
+	javac -d bin $(JAVA_SRCS)
 
 test: all
 	prove tests/tap/*.t
