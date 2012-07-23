@@ -166,6 +166,8 @@ class NuriSolver extends Thread  {
 					+ " inferences and " + totalHypotheses +
 					" guesses at a max search depth of " + maxSearchDepth);
 			// System.out.println("Correct? " + checkSolution(args[fileArg])); TODO: implement this
+            System.out.println("Final solution is:");
+            System.out.println(latestBoard);
 		} else {
 			System.out.println("Unable to solve puzzle. I got this far:");
 			System.out.println(latestBoard);
