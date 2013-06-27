@@ -33,3 +33,7 @@ test: all
 
 runtest: all
 	runprove tests/tap/*.t
+
+clean:
+	rm -f $(JAVA_BINS)
+
