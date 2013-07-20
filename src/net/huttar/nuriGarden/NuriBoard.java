@@ -55,7 +55,7 @@ import net.huttar.nuriGarden.NuriSolver;
 /** Program to solve NuriBoard puzzles.
  * A "NuriBoard" instance represents a board state.
  * Used to be one class with NuriSolver, named Nurikabe, but I split it up. */
-class NuriBoard implements Iterable<Coords>, Cloneable  {
+public class NuriBoard implements Iterable<Coords>, Cloneable  {
 	/** Character for a filled-in cell. */
 	static final char BLACK = '#';
 	/** Character for a cell known to be white. */
@@ -127,7 +127,7 @@ class NuriBoard implements Iterable<Coords>, Cloneable  {
 	/** The puzzle that this puzzle is a hypothesis branch from. */
 	NuriBoard predecessor = null;
 
-	NuriBoard() {
+	public NuriBoard() {
 	}
 
 	/** Create object and initialize to given dimensions. */

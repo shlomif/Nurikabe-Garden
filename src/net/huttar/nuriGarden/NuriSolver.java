@@ -21,7 +21,7 @@ import java.util.Iterator;
 import java.util.List;
 
 
-class NuriSolver extends Thread  {
+public class NuriSolver extends Thread  {
 	// For explanation of comments below of the form //A or B or C, see notes.txt
 
 	enum StopMode { ONESTEP, STEPIN, STEPOVER, STEPOUT, CONTINUE, RESTART, EXIT };

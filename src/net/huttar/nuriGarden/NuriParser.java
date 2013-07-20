@@ -20,10 +20,10 @@ import java.util.regex.Pattern;
  * @author Lars Huttar, lars at huttar dot net
  *
  */
-class NuriParser {
+public class NuriParser {
 	private String filename = null;
 
-	NuriParser(String fn) {
+	public NuriParser(String fn) {
 		filename = fn;
 	}
 
@@ -37,6 +37,23 @@ class NuriParser {
 		return puz;
 	}
 
+    public void loadPuzFromLines(NuriBoard puz, ArrayList<String> lines) {
+        int rows = lines.size();
+        int columns = lines.get(0).length();
+        // grid = new char[lines.size()][lines.get(0).length()];
+        puz.newGrid(rows, columns);
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < columns; c++) {
+                char symbol = lines.get(r).charAt(c);
+                // grid[r][c] = (symbol == WHITE) ? UNKNOWN : symbol;
+                puz.initializeCell(r, c,
+                        (symbol == NuriBoard.WHITE || symbol == '-') ? NuriBoard.UNKNOWN : symbol);
+            }
+        }
+        puz.prepareStats(false);
+    }
+
+
 	void loadPuz(NuriBoard puz, String filename) {
 		try {
 			Scanner in = new Scanner(new FileInputStream(filename));
@@ -44,19 +61,7 @@ class NuriParser {
 			while (in.hasNextLine()) {
 				lines.add(in.nextLine());
 			}
-			int rows = lines.size();
-			int columns = lines.get(0).length();
-			// grid = new char[lines.size()][lines.get(0).length()];
-			puz.newGrid(rows, columns);
-			for (int r = 0; r < rows; r++) {
-				for (int c = 0; c < columns; c++) {
-					char symbol = lines.get(r).charAt(c);
-					// grid[r][c] = (symbol == WHITE) ? UNKNOWN : symbol;
-					puz.initializeCell(r, c,
-							(symbol == NuriBoard.WHITE || symbol == '-') ? NuriBoard.UNKNOWN : symbol);
-				}
-			}
-			puz.prepareStats(false);
+            loadPuzFromLines(puz, lines);
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(1);
