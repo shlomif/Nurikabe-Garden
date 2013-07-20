@@ -84,7 +84,7 @@ public class NuriSolver extends Thread  {
 
 
 	/** Read specified puzzle from the given file. */
-	NuriSolver(NuriBoard board,
+	public NuriSolver(NuriBoard board,
 			boolean debugMode, NuriCanvas vis) {
 		NuriSolver.debugMode = debugMode;
 		this.visualizer = vis;
@@ -214,7 +214,7 @@ public class NuriSolver extends Thread  {
 	}
 
 	/** Solve the puzzle and return true if successful. */
-	boolean solve(NuriBoard board) throws ContradictionException {
+	public boolean solve(NuriBoard board) throws ContradictionException {
 		board.changed = true;
 		board.validityKnown = false;
 
@@ -698,6 +698,10 @@ public class NuriSolver extends Thread  {
 	/** reset solver to last sure board state. ##TODO implement. */
 	void resetToSure() {
 	}
+
+    public NuriBoard getLatestBoard() {
+        return latestBoard;
+    }
 
 	//// The following was for trying to change a cell state by user input while the solver
 	//// was running. Dumb idea... way too complicated for now. May resurrect later if important.
