@@ -24,7 +24,7 @@ need to create a new instance of the solver?
 Look through the instance fields of the solver and see
 what they belong to:
 A - Can they be static, applying to all solvers (in case theoretically
-there were more than one solver working)?  
+there were more than one solver working)?
 B - Can they be shared by all "solvers" (whether represented by
 separate instances or by recursive calls to solve) within
 a single solving effort?
